@@ -1,6 +1,7 @@
 class PopupManager {
     constructor() {
         this.settings = { keywords: [], subreddits: [], enabled: true };
+        this.counters = { totalRemoved: 0, dailyRemoved: 0, lastResetDate: new Date().toDateString() };
         this.filteredKeywords = [];
         this.filteredSubreddits = [];
         this.currentTab = 'keywords';
@@ -9,10 +10,22 @@ class PopupManager {
 
     async init() {
         await this.loadSettings();
+        await this.loadCounters();
         this.setupEventListeners();
         this.setupTabs();
         this.renderAll();
         this.updateAllStats();
+        this.updateCounterDisplay();
+
+        // Request fresh counter data from content script
+        try {
+            const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+            if (tabs[0]) {
+                browser.tabs.sendMessage(tabs[0].id, { type: 'requestCounters' });
+            }
+        } catch (error) {
+            // Ignore if content script not available
+        }
     }
 
     async loadSettings() {
@@ -30,6 +43,25 @@ class PopupManager {
         this.filteredSubreddits = [...this.settings.subreddits];
     }
 
+    async loadCounters() {
+        try {
+            const result = await browser.storage.local.get(['politicalFilterCounters']);
+            if (result.politicalFilterCounters) {
+                this.counters = result.politicalFilterCounters;
+
+                // Reset daily counter if it's a new day
+                const today = new Date().toDateString();
+                if (this.counters.lastResetDate !== today) {
+                    this.counters.dailyRemoved = 0;
+                    this.counters.lastResetDate = today;
+                    await this.saveCounters();
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load counters:', error);
+        }
+    }
+
     async saveSettings() {
         try {
             await browser.storage.local.set({ politicalFilterSettings: this.settings });
@@ -41,6 +73,27 @@ class PopupManager {
             }
         } catch (error) {
             console.error('Failed to save settings:', error);
+        }
+    }
+
+    async saveCounters() {
+        try {
+            await browser.storage.local.set({ politicalFilterCounters: this.counters });
+        } catch (error) {
+            console.error('Failed to save counters:', error);
+        }
+    }
+
+    updateCounterDisplay() {
+        const totalElement = document.getElementById('totalCounter');
+        const dailyElement = document.getElementById('dailyCounter');
+
+        if (totalElement) {
+            totalElement.textContent = this.counters.totalRemoved.toLocaleString();
+        }
+
+        if (dailyElement) {
+            dailyElement.textContent = this.counters.dailyRemoved.toLocaleString();
         }
     }
 
@@ -101,6 +154,24 @@ class PopupManager {
                 this.addSubreddit();
             }
         });
+
+        // Listen for counter updates from content script
+        if (typeof browser !== 'undefined' && browser.runtime) {
+            browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === 'countersUpdated') {
+                    this.counters = message.counters;
+                    this.updateCounterDisplay();
+                }
+            });
+        }
+
+        // Refresh counters on popup open
+        this.refreshCounters();
+    }
+
+    async refreshCounters() {
+        await this.loadCounters();
+        this.updateCounterDisplay();
     }
 
     // Keywords methods
@@ -116,13 +187,23 @@ class PopupManager {
         const container = document.getElementById('keywordsContainer');
         container.innerHTML = '';
 
+        if (this.filteredKeywords.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div>No keywords found</div>
+                </div>
+            `;
+            return;
+        }
+
         this.filteredKeywords.forEach((keyword) => {
             const item = document.createElement('div');
             item.className = 'list-item';
             item.innerHTML = `
-        <span>${keyword}</span>
-        <button class="delete-btn" data-keyword="${keyword}">Delete</button>
-      `;
+                <span>${keyword}</span>
+                <button class="delete-btn" data-keyword="${keyword}">Delete</button>
+            `;
 
             item.querySelector('.delete-btn').addEventListener('click', () => {
                 this.removeKeyword(keyword);
@@ -162,7 +243,7 @@ class PopupManager {
 
     updateKeywordStats() {
         const stats = document.getElementById('keywordStats');
-        stats.textContent = `Total keywords: ${this.settings.keywords.length}`;
+        stats.textContent = `📝 Total keywords: ${this.settings.keywords.length}`;
     }
 
     // Subreddits methods
@@ -178,13 +259,23 @@ class PopupManager {
         const container = document.getElementById('subredditsContainer');
         container.innerHTML = '';
 
+        if (this.filteredSubreddits.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div>No subreddits found</div>
+                </div>
+            `;
+            return;
+        }
+
         this.filteredSubreddits.forEach((subreddit) => {
             const item = document.createElement('div');
             item.className = 'list-item';
             item.innerHTML = `
-        <span>${subreddit}</span>
-        <button class="delete-btn" data-subreddit="${subreddit}">Delete</button>
-      `;
+                <span>${subreddit}</span>
+                <button class="delete-btn" data-subreddit="${subreddit}">Delete</button>
+            `;
 
             item.querySelector('.delete-btn').addEventListener('click', () => {
                 this.removeSubreddit(subreddit);
@@ -229,7 +320,7 @@ class PopupManager {
 
     updateSubredditStats() {
         const stats = document.getElementById('subredditStats');
-        stats.textContent = `Total subreddits: ${this.settings.subreddits.length}`;
+        stats.textContent = `📋 Total subreddits: ${this.settings.subreddits.length}`;
     }
 
     // Combined methods
