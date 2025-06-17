@@ -78,37 +78,37 @@
             }
 
             .stats-section {
-                background: linear-gradient(
-                    135deg,
-                    #ff9a9e 0%,
-                    #fecfef 50%,
-                    #fecfef 100%
-                );
-                border-radius: 12px;
-                padding: 20px;
-                margin-bottom: 20px;
-                color: #333;
-            }
-
-            .stats-title {
-                font-size: 18px;
-                font-weight: 600;
-                margin-bottom: 16px;
-                text-align: center;
-            }
-
-            .stats-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-
-            .stat-card {
-                background: rgba(255, 255, 255, 0.9);
+                background: #f8f9fa;
                 border-radius: 8px;
-                padding: 16px;
-                text-align: center;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                padding: 10px 16px;
+                margin-bottom: 20px;
+                border: 1px solid #e9ecef;
+            }
+
+            .stats-compact {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                font-size: 13px;
+                color: #666;
+            }
+
+            .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .stat-number {
+                font-weight: 600;
+                color: #667eea;
+                font-size: 14px;
+            }
+
+            .stat-separator {
+                color: #ccc;
+                font-weight: bold;
             }
 
             .stat-number {
@@ -345,21 +345,21 @@
                 <div class="toggle-container">
                     <label class="toggle">
                         <input type="checkbox" id="enableFilter">
-                        <span>Enable Political Filter</span>
+                        <span>Enable Filter</span>
                     </label>
                 </div>
 
                 <div class="stats-section">
-                    <div class="stats-title">📊 Removal Statistics</div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <span class="stat-number" id="totalCounter">0</span>
-                            <span class="stat-label">Total Removed</span>
-                        </div>
-                        <div class="stat-card">
+                    <div class="stats-compact">
+                        <span class="stat-item">
+                            📊 <span class="stat-number" id="totalCounter"
+                            >0</span> removed
+                        </span>
+                        <span class="stat-separator">•</span>
+                        <span class="stat-item">
                             <span class="stat-number" id="dailyCounter">0</span>
-                            <span class="stat-label">Today</span>
-                        </div>
+                            today
+                        </span>
                     </div>
                 </div>
 

@@ -21,18 +21,19 @@ class PopupManager {
         try {
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
             if (tabs[0]) {
-                browser.tabs.sendMessage(tabs[0].id, { type: 'requestCounters' });
+                await browser.tabs.sendMessage(tabs[0].id, { type: 'requestCounters' });
             }
         } catch (error) {
-            // Ignore if content script not available
+            // Silently ignore if content script not available or tab doesn't support messaging
+            // This happens on non-Reddit pages or extension pages
         }
     }
 
     async loadSettings() {
         try {
-            const result = await browser.storage.local.get(['politicalFilterSettings']);
-            if (result.politicalFilterSettings) {
-                this.settings = result.politicalFilterSettings;
+            const result = await browser.storage.local.get(['filterSettings']);
+            if (result.filterSettings) {
+                this.settings = result.filterSettings;
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
@@ -45,9 +46,9 @@ class PopupManager {
 
     async loadCounters() {
         try {
-            const result = await browser.storage.local.get(['politicalFilterCounters']);
-            if (result.politicalFilterCounters) {
-                this.counters = result.politicalFilterCounters;
+            const result = await browser.storage.local.get(['filterCounters']);
+            if (result.filterCounters) {
+                this.counters = result.filterCounters;
 
                 // Reset daily counter if it's a new day
                 const today = new Date().toDateString();
@@ -64,7 +65,7 @@ class PopupManager {
 
     async saveSettings() {
         try {
-            await browser.storage.local.set({ politicalFilterSettings: this.settings });
+            await browser.storage.local.set({ filterSettings: this.settings });
 
             // Notify content script of settings update
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -78,7 +79,7 @@ class PopupManager {
 
     async saveCounters() {
         try {
-            await browser.storage.local.set({ politicalFilterCounters: this.counters });
+            await browser.storage.local.set({ filterCounters: this.counters });
         } catch (error) {
             console.error('Failed to save counters:', error);
         }
@@ -156,12 +157,17 @@ class PopupManager {
         });
 
         // Listen for counter updates from content script
+        // Listen for counter updates from content script
         if (typeof browser !== 'undefined' && browser.runtime) {
             browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 if (message.type === 'countersUpdated') {
                     this.counters = message.counters;
                     this.updateCounterDisplay();
+                    // Send acknowledgment
+                    sendResponse({ received: true });
                 }
+                // Return true to indicate we'll send a response asynchronously (even though we're doing it synchronously)
+                return true;
             });
         }
 
