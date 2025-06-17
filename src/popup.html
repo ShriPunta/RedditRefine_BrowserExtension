@@ -4,9 +4,9 @@
         <meta charset="utf-8">
         <style>
             body {
-                width: 400px;
-                min-height: 500px;
-                padding: 16px;
+                width: 450px;
+                min-height: 600px;
+                padding: 0;
                 font-family:
                     -apple-system,
                     BlinkMacSystemFont,
@@ -14,48 +14,148 @@
                     Roboto,
                     sans-serif;
                 margin: 0;
+                background: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                color: #333;
+            }
+
+            .container {
+                background: white;
+                margin: 0;
+                min-height: 600px;
             }
 
             .header {
-                border-bottom: 1px solid #e0e0e0;
-                padding-bottom: 12px;
-                margin-bottom: 16px;
+                background: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                color: white;
+                padding: 20px;
+                text-align: center;
+                margin: 0;
+            }
+
+            .header h2 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: 600;
+            }
+
+            .header p {
+                margin: 8px 0 0 0;
+                opacity: 0.9;
+                font-size: 14px;
+            }
+
+            .content {
+                padding: 20px;
             }
 
             .toggle-container {
-                margin-bottom: 16px;
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 20px;
+                border: 1px solid #e9ecef;
             }
 
             .toggle {
                 display: flex;
                 align-items: center;
-                gap: 8px;
+                gap: 12px;
+                font-weight: 500;
+            }
+
+            .toggle input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                accent-color: #667eea;
+            }
+
+            .stats-section {
+                background: linear-gradient(
+                    135deg,
+                    #ff9a9e 0%,
+                    #fecfef 50%,
+                    #fecfef 100%
+                );
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                color: #333;
+            }
+
+            .stats-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 16px;
+                text-align: center;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+
+            .stat-card {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 8px;
+                padding: 16px;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .stat-number {
+                font-size: 32px;
+                font-weight: bold;
+                color: #667eea;
+                margin-bottom: 4px;
+                display: block;
+            }
+
+            .stat-label {
+                font-size: 14px;
+                color: #666;
+                font-weight: 500;
             }
 
             .tabs {
                 display: flex;
-                border-bottom: 1px solid #e0e0e0;
-                margin-bottom: 16px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 4px;
+                margin-bottom: 20px;
+                gap: 4px;
             }
 
             .tab {
                 flex: 1;
-                padding: 8px 16px;
+                padding: 12px 16px;
                 border: none;
-                background: #f5f5f5;
+                background: transparent;
                 cursor: pointer;
-                border-bottom: 2px solid transparent;
+                border-radius: 6px;
                 font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                color: #666;
             }
 
             .tab.active {
-                background: white;
-                border-bottom-color: #0066cc;
-                font-weight: 600;
+                background: #667eea;
+                color: white;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
             }
 
             .tab:hover:not(.active) {
-                background: #e8e8e8;
+                background: #e9ecef;
+                color: #333;
             }
 
             .tab-content {
@@ -67,32 +167,44 @@
             }
 
             .search-container {
-                margin-bottom: 12px;
+                margin-bottom: 16px;
             }
 
             .search-input {
                 width: 100%;
-                padding: 8px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                padding: 12px 16px;
+                border: 2px solid #e9ecef;
+                border-radius: 8px;
                 box-sizing: border-box;
+                font-size: 14px;
+                transition: border-color 0.2s ease;
+            }
+
+            .search-input:focus {
+                outline: none;
+                border-color: #667eea;
             }
 
             .list-container {
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                max-height: 200px;
+                border: 2px solid #e9ecef;
+                border-radius: 8px;
+                max-height: 250px;
                 overflow-y: auto;
-                background: #f9f9f9;
+                background: #fafafa;
             }
 
             .list-item {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 6px 8px;
-                border-bottom: 1px solid #e0e0e0;
+                padding: 12px 16px;
+                border-bottom: 1px solid #e9ecef;
                 font-size: 14px;
+                transition: background-color 0.2s ease;
+            }
+
+            .list-item:hover {
+                background: #f1f3f4;
             }
 
             .list-item:last-child {
@@ -104,50 +216,65 @@
             }
 
             .delete-btn {
-                background: #ff4444;
+                background: #dc3545;
                 color: white;
                 border: none;
-                border-radius: 3px;
-                padding: 2px 6px;
+                border-radius: 6px;
+                padding: 6px 12px;
                 cursor: pointer;
                 font-size: 12px;
+                font-weight: 500;
+                transition: background-color 0.2s ease;
             }
 
             .delete-btn:hover {
-                background: #cc0000;
+                background: #c82333;
             }
 
             .add-container {
-                margin-top: 12px;
+                margin-top: 16px;
                 display: flex;
-                gap: 8px;
+                gap: 12px;
             }
 
             .add-input {
                 flex: 1;
-                padding: 6px;
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                padding: 12px 16px;
+                border: 2px solid #e9ecef;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.2s ease;
+            }
+
+            .add-input:focus {
+                outline: none;
+                border-color: #667eea;
             }
 
             .add-btn {
-                background: #0066cc;
+                background: #28a745;
                 color: white;
                 border: none;
-                border-radius: 4px;
-                padding: 6px 12px;
+                border-radius: 8px;
+                padding: 12px 20px;
                 cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.2s ease;
+                white-space: nowrap;
             }
 
             .add-btn:hover {
-                background: #0052a3;
+                background: #218838;
             }
 
-            .stats {
-                margin-top: 12px;
-                font-size: 12px;
-                color: #666;
+            .item-stats {
+                margin-top: 16px;
                 text-align: center;
+                font-size: 13px;
+                color: #666;
+                background: #f8f9fa;
+                padding: 12px;
+                border-radius: 8px;
             }
 
             .subreddit-prefix {
@@ -159,98 +286,156 @@
                 position: relative;
                 display: flex;
                 align-items: center;
+                flex: 1;
             }
 
             .input-prefix {
                 position: absolute;
-                left: 8px;
+                left: 16px;
                 color: #666;
                 pointer-events: none;
                 z-index: 1;
+                font-weight: 500;
             }
 
             .prefixed-input {
-                padding-left: 24px;
+                padding-left: 32px;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 40px 20px;
+                color: #666;
+            }
+
+            .empty-state-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+                opacity: 0.3;
+            }
+
+            /* Scrollbar styling */
+            .list-container::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .list-container::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 3px;
+            }
+
+            .list-container::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 3px;
+            }
+
+            .list-container::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
             }
         </style>
     </head>
     <body>
-        <div class="header">
-            <h2>Political Filter</h2>
-        </div>
-
-        <div class="toggle-container">
-            <label class="toggle">
-                <input type="checkbox" id="enableFilter">
-                <span>Enable Political Filter</span>
-            </label>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="keywords">Keywords</button>
-            <button class="tab" data-tab="subreddits">Subreddits</button>
-        </div>
-
-        <!-- Keywords Tab -->
-        <div class="tab-content active" id="keywords-tab">
-            <div class="search-container">
-                <input
-                    type="text"
-                    class="search-input"
-                    id="keywordSearchInput"
-                    placeholder="Search keywords..."
-                >
+        <div class="container">
+            <div class="header">
+                <h2>🛡️ Filter</h2>
+                <p>Keep your Reddit feed clean and focused</p>
             </div>
 
-            <div class="list-container" id="keywordsContainer">
-                <!-- Keywords will be populated here -->
-            </div>
-
-            <div class="add-container">
-                <input
-                    type="text"
-                    class="add-input"
-                    id="keywordAddInput"
-                    placeholder="Add new keyword..."
-                >
-                <button class="add-btn" id="keywordAddBtn">Add</button>
-            </div>
-
-            <div class="stats" id="keywordStats">
-                <!-- Stats will be shown here -->
-            </div>
-        </div>
-
-        <!-- Subreddits Tab -->
-        <div class="tab-content" id="subreddits-tab">
-            <div class="search-container">
-                <input
-                    type="text"
-                    class="search-input"
-                    id="subredditSearchInput"
-                    placeholder="Search subreddits..."
-                >
-            </div>
-
-            <div class="list-container" id="subredditsContainer">
-                <!-- Subreddits will be populated here -->
-            </div>
-
-            <div class="add-container">
-                <div class="input-with-prefix" style="flex: 1">
-                    <span class="input-prefix">r/</span>
-                    <input
-                        type="text"
-                        class="add-input prefixed-input"
-                        id="subredditAddInput"
-                        placeholder="subreddit name..."
-                    >
+            <div class="content">
+                <div class="toggle-container">
+                    <label class="toggle">
+                        <input type="checkbox" id="enableFilter">
+                        <span>Enable Political Filter</span>
+                    </label>
                 </div>
-                <button class="add-btn" id="subredditAddBtn">Add</button>
-            </div>
 
-            <div class="stats" id="subredditStats">
-                <!-- Stats will be shown here -->
+                <div class="stats-section">
+                    <div class="stats-title">📊 Removal Statistics</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number" id="totalCounter">0</span>
+                            <span class="stat-label">Total Removed</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="dailyCounter">0</span>
+                            <span class="stat-label">Today</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="keywords">
+                        Keywords
+                    </button>
+                    <button class="tab" data-tab="subreddits">
+                        Subreddits
+                    </button>
+                </div>
+
+                <!-- Keywords Tab -->
+                <div class="tab-content active" id="keywords-tab">
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="keywordSearchInput"
+                            placeholder="🔍 Search keywords..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="keywordsContainer">
+                        <!-- Keywords will be populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <input
+                            type="text"
+                            class="add-input"
+                            id="keywordAddInput"
+                            placeholder="Add new keyword..."
+                        >
+                        <button class="add-btn" id="keywordAddBtn">Add</button>
+                    </div>
+
+                    <div class="item-stats" id="keywordStats">
+                        <!-- Stats will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Subreddits Tab -->
+                <div class="tab-content" id="subreddits-tab">
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="subredditSearchInput"
+                            placeholder="🔍 Search subreddits..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="subredditsContainer">
+                        <!-- Subreddits will be populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">r/</span>
+                            <input
+                                type="text"
+                                class="add-input prefixed-input"
+                                id="subredditAddInput"
+                                placeholder="subreddit name..."
+                            >
+                        </div>
+                        <button class="add-btn" id="subredditAddBtn">
+                            Add
+                        </button>
+                    </div>
+
+                    <div class="item-stats" id="subredditStats">
+                        <!-- Stats will be shown here -->
+                    </div>
+                </div>
             </div>
         </div>
 

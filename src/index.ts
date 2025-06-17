@@ -8,6 +8,12 @@ interface FilterSettings {
     enabled: boolean;
 }
 
+interface CounterData {
+    totalRemoved: number;
+    dailyRemoved: number;
+    lastResetDate: string;
+}
+
 const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
     .split('\n')
     .map(line => line.trim())
@@ -25,10 +31,21 @@ class PoliticalFilter {
         subreddits: DEFAULT_SUBREDDITS,
         enabled: true
     };
+    private counters: CounterData = {
+        totalRemoved: 0,
+        dailyRemoved: 0,
+        lastResetDate: new Date().toDateString()
+    };
     private observer: MutationObserver | null = null;
+
+    // Add this public getter method
+    public getCounters(): CounterData {
+        return { ...this.counters };
+    }
 
     async init() {
         await this.loadSettings();
+        await this.loadCounters();
         if (this.settings.enabled) {
             this.removePoliticalPosts();
             this.setupObserver();
@@ -49,12 +66,57 @@ class PoliticalFilter {
         }
     }
 
+    private async loadCounters(): Promise<void> {
+        try {
+            const result = await browser.storage.local.get(['politicalFilterCounters']);
+            if (result.politicalFilterCounters) {
+                this.counters = { ...this.counters, ...result.politicalFilterCounters };
+
+                // Reset daily counter if it's a new day
+                const today = new Date().toDateString();
+                if (this.counters.lastResetDate !== today) {
+                    this.counters.dailyRemoved = 0;
+                    this.counters.lastResetDate = today;
+                    await this.saveCounters();
+                }
+            } else {
+                await this.saveCounters();
+            }
+        } catch (error) {
+            console.log('Using default counters');
+        }
+    }
+
     private async saveSettings(): Promise<void> {
         try {
             await browser.storage.local.set({ politicalFilterSettings: this.settings });
         } catch (error) {
             console.error('Failed to save settings:', error);
         }
+    }
+
+    private async saveCounters(): Promise<void> {
+        try {
+            await browser.storage.local.set({ politicalFilterCounters: this.counters });
+
+            // Notify popup of counter updates using runtime.sendMessage instead of tabs.sendMessage
+            try {
+                browser.runtime.sendMessage({
+                    type: 'countersUpdated',
+                    counters: this.counters
+                });
+            } catch (error) {
+                // Ignore errors - popup might not be open
+            }
+        } catch (error) {
+            console.error('Failed to save counters:', error);
+        }
+    }
+
+    private async incrementCounters(): Promise<void> {
+        this.counters.totalRemoved++;
+        this.counters.dailyRemoved++;
+        await this.saveCounters();
     }
 
     private setupObserver(): void {
@@ -127,6 +189,9 @@ class PoliticalFilter {
                 const articleParent = post.closest('article');
                 const elementToRemove = articleParent || post;
                 elementToRemove.remove();
+
+                // Increment counters
+                this.incrementCounters();
             }
         });
     }
@@ -156,7 +221,7 @@ class PoliticalFilter {
 let filter: PoliticalFilter | null = null;
 
 const main = () => {
-    console.log("Political Filter Extension loaded");
+    console.log(" Filter Extension loaded");
     filter = new PoliticalFilter();
     filter.init();
 };
@@ -164,11 +229,22 @@ const main = () => {
 // Listen for settings updates from popup
 if (typeof browser !== 'undefined' && browser.runtime) {
     browser.runtime.onMessage.addListener((message) => {
-        if (message.type === 'settingsUpdated') {
-            if (filter) {
-                filter.destroy();
-            }
-            main();
+        // Add this to the existing message listener
+        if (typeof browser !== 'undefined' && browser.runtime) {
+            browser.runtime.onMessage.addListener((message) => {
+                if (message.type === 'settingsUpdated') {
+                    if (filter) {
+                        filter.destroy();
+                    }
+                    main();
+                } else if (message.type === 'requestCounters') {
+                    // Send current counter data to popup
+                    browser.runtime.sendMessage({
+                        type: 'countersUpdated',
+                        counters: filter?.getCounters() || { totalRemoved: 0, dailyRemoved: 0, lastResetDate: new Date().toDateString() }
+                    });
+                }
+            });
         }
     });
 }
