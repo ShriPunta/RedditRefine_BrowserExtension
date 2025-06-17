@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <style>
             body {
-                width: 350px;
-                min-height: 400px;
+                width: 400px;
+                min-height: 500px;
                 padding: 16px;
                 font-family:
                     -apple-system,
@@ -32,6 +32,40 @@
                 gap: 8px;
             }
 
+            .tabs {
+                display: flex;
+                border-bottom: 1px solid #e0e0e0;
+                margin-bottom: 16px;
+            }
+
+            .tab {
+                flex: 1;
+                padding: 8px 16px;
+                border: none;
+                background: #f5f5f5;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                font-size: 14px;
+            }
+
+            .tab.active {
+                background: white;
+                border-bottom-color: #0066cc;
+                font-weight: 600;
+            }
+
+            .tab:hover:not(.active) {
+                background: #e8e8e8;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
             .search-container {
                 margin-bottom: 12px;
             }
@@ -44,7 +78,7 @@
                 box-sizing: border-box;
             }
 
-            .keywords-container {
+            .list-container {
                 border: 1px solid #ccc;
                 border-radius: 4px;
                 max-height: 200px;
@@ -52,7 +86,7 @@
                 background: #f9f9f9;
             }
 
-            .keyword-item {
+            .list-item {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -61,11 +95,11 @@
                 font-size: 14px;
             }
 
-            .keyword-item:last-child {
+            .list-item:last-child {
                 border-bottom: none;
             }
 
-            .keyword-item.hidden {
+            .list-item.hidden {
                 display: none;
             }
 
@@ -115,6 +149,29 @@
                 color: #666;
                 text-align: center;
             }
+
+            .subreddit-prefix {
+                color: #666;
+                margin-right: 2px;
+            }
+
+            .input-with-prefix {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+            .input-prefix {
+                position: absolute;
+                left: 8px;
+                color: #666;
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            .prefixed-input {
+                padding-left: 24px;
+            }
         </style>
     </head>
     <body>
@@ -129,31 +186,72 @@
             </label>
         </div>
 
-        <div class="search-container">
-            <input
-                type="text"
-                class="search-input"
-                id="searchInput"
-                placeholder="Search keywords..."
-            >
+        <div class="tabs">
+            <button class="tab active" data-tab="keywords">Keywords</button>
+            <button class="tab" data-tab="subreddits">Subreddits</button>
         </div>
 
-        <div class="keywords-container" id="keywordsContainer">
-            <!-- Keywords will be populated here -->
+        <!-- Keywords Tab -->
+        <div class="tab-content active" id="keywords-tab">
+            <div class="search-container">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="keywordSearchInput"
+                    placeholder="Search keywords..."
+                >
+            </div>
+
+            <div class="list-container" id="keywordsContainer">
+                <!-- Keywords will be populated here -->
+            </div>
+
+            <div class="add-container">
+                <input
+                    type="text"
+                    class="add-input"
+                    id="keywordAddInput"
+                    placeholder="Add new keyword..."
+                >
+                <button class="add-btn" id="keywordAddBtn">Add</button>
+            </div>
+
+            <div class="stats" id="keywordStats">
+                <!-- Stats will be shown here -->
+            </div>
         </div>
 
-        <div class="add-container">
-            <input
-                type="text"
-                class="add-input"
-                id="addInput"
-                placeholder="Add new keyword..."
-            >
-            <button class="add-btn" id="addBtn">Add</button>
-        </div>
+        <!-- Subreddits Tab -->
+        <div class="tab-content" id="subreddits-tab">
+            <div class="search-container">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="subredditSearchInput"
+                    placeholder="Search subreddits..."
+                >
+            </div>
 
-        <div class="stats" id="stats">
-            <!-- Stats will be shown here -->
+            <div class="list-container" id="subredditsContainer">
+                <!-- Subreddits will be populated here -->
+            </div>
+
+            <div class="add-container">
+                <div class="input-with-prefix" style="flex: 1">
+                    <span class="input-prefix">r/</span>
+                    <input
+                        type="text"
+                        class="add-input prefixed-input"
+                        id="subredditAddInput"
+                        placeholder="subreddit name..."
+                    >
+                </div>
+                <button class="add-btn" id="subredditAddBtn">Add</button>
+            </div>
+
+            <div class="stats" id="subredditStats">
+                <!-- Stats will be shown here -->
+            </div>
         </div>
 
         <script src="popup.js"></script>

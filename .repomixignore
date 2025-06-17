@@ -7,3 +7,6 @@ package-lock.json
 dist/
 node_modules/
 *.code-workspace
+
+default_keywords.txt
+default_subreddits.txt

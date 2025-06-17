@@ -1,32 +1,28 @@
+// Import the text files
+import defaultKeywordsText from '../default_keywords.txt';
+import defaultSubredditsText from '../default_subreddits.txt';
+
 interface FilterSettings {
     keywords: string[];
+    subreddits: string[];
     enabled: boolean;
 }
 
-const DEFAULT_KEYWORDS = [
-    'trump', 'biden', 'democrat', 'republican', 'congress', 'senate', 'election',
-    'vote', 'voting', 'political', 'politics', 'politician', 'government',
-    'conservative', 'liberal', 'leftist', 'rightist', 'fascist', 'communist',
-    'socialism', 'capitalism', 'impeach', 'campaign', 'ballot', 'maga',
-    'gop', 'dnc', 'rnc', 'president', 'vice president', 'governor', 'mayor',
-    'protest', 'rally', 'march', 'demonstration', 'activism', 'activist',
-    'immigration', 'border', 'refugee', 'climate change', 'global warming',
-    'healthcare', 'medicare', 'medicaid', 'obamacare', 'abortion', 'pro-life',
-    'pro-choice', 'gun control', 'second amendment', 'nra', 'tax', 'taxes',
-    'economy', 'inflation', 'recession', 'stimulus', 'welfare', 'social security',
-    'supreme court', 'scotus', 'justice', 'constitutional', 'amendment',
-    'freedom', 'liberty', 'patriot', 'nationalism', 'globalism', 'antifa',
-    'blm', 'black lives matter', 'white supremacy', 'racism', 'discrimination',
-    'lgbtq', 'transgender', 'gay rights', 'marriage equality', 'religious freedom',
-    'war', 'military', 'defense', 'nato', 'ukraine', 'russia', 'china',
-    'israel', 'palestine', 'middle east', 'foreign policy', 'sanctions',
-    'covid', 'coronavirus', 'pandemic', 'vaccine', 'mask mandate', 'lockdown',
-    'fauci', 'cdc', 'who', 'public health'
-];
+const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+const DEFAULT_SUBREDDITS = (defaultSubredditsText as string)
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(subreddit => `r/${subreddit}`); // Add r/ prefix back
 
 class PoliticalFilter {
     private settings: FilterSettings = {
         keywords: DEFAULT_KEYWORDS,
+        subreddits: DEFAULT_SUBREDDITS,
         enabled: true
     };
     private observer: MutationObserver | null = null;
@@ -68,7 +64,10 @@ class PoliticalFilter {
                 mutation.addedNodes.forEach((node) => {
                     if (node.nodeType === Node.ELEMENT_NODE) {
                         const element = node as Element;
-                        if (element.tagName === 'ARTICLE' || element.querySelector('article')) {
+                        if (element.tagName === 'ARTICLE' ||
+                            element.tagName === 'SHREDDIT-POST' ||
+                            element.querySelector('article') ||
+                            element.querySelector('shreddit-post')) {
                             shouldCheck = true;
                         }
                     }
@@ -87,14 +86,47 @@ class PoliticalFilter {
     }
 
     private removePoliticalPosts(): void {
-        const articles = document.querySelectorAll('article[aria-label]');
+        // Check both article elements and shreddit-post elements
+        const posts = document.querySelectorAll('article[aria-label], shreddit-post');
 
-        articles.forEach((article) => {
-            const ariaLabel = article.getAttribute('aria-label')?.toLowerCase() || '';
+        posts.forEach((post) => {
+            let shouldRemove = false;
+            let reason = '';
 
-            if (this.isPolitical(ariaLabel)) {
-                console.log('Removing political post:', ariaLabel);
-                article.remove();
+            // Check aria-label for political keywords (for article elements)
+            if (post.tagName === 'ARTICLE') {
+                const ariaLabel = post.getAttribute('aria-label')?.toLowerCase() || '';
+                if (this.isPolitical(ariaLabel)) {
+                    shouldRemove = true;
+                    reason = `political keyword in title: "${ariaLabel}"`;
+                }
+            }
+
+            // Check subreddit name (for both article and shreddit-post elements)
+            const subredditName = post.getAttribute('subreddit-prefixed-name') || '';
+            if (subredditName && this.isBlockedSubreddit(subredditName)) {
+                shouldRemove = true;
+                reason = `blocked subreddit: ${subredditName}`;
+            }
+
+            // Also check if this is a shreddit-post inside an article
+            if (post.tagName === 'SHREDDIT-POST') {
+                const parentArticle = post.closest('article');
+                if (parentArticle) {
+                    const ariaLabel = parentArticle.getAttribute('aria-label')?.toLowerCase() || '';
+                    if (this.isPolitical(ariaLabel)) {
+                        shouldRemove = true;
+                        reason = `political keyword in title: "${ariaLabel}"`;
+                    }
+                }
+            }
+
+            if (shouldRemove) {
+                console.log('Removing post:', reason);
+                // Remove the top-level article if it exists, otherwise remove the post itself
+                const articleParent = post.closest('article');
+                const elementToRemove = articleParent || post;
+                elementToRemove.remove();
             }
         });
     }
@@ -103,6 +135,13 @@ class PoliticalFilter {
         const lowerText = text.toLowerCase();
         return this.settings.keywords.some(keyword =>
             lowerText.includes(keyword.toLowerCase())
+        );
+    }
+
+    private isBlockedSubreddit(subredditName: string): boolean {
+        const lowerSubreddit = subredditName.toLowerCase();
+        return this.settings.subreddits.some(blocked =>
+            blocked.toLowerCase() === lowerSubreddit
         );
     }
 
