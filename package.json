@@ -7,6 +7,6 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "build": "npx webpack --config webpack.config.js"
+    "build": "npx webpack --config webpack.config.js && cp src/popup.html src/popup.js dist/"
   }
 }

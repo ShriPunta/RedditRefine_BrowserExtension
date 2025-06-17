@@ -18,5 +18,9 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": []
+  "browser_action": {
+    "default_popup": "dist/popup.html",
+    "default_title": "Political Filter Settings"
+  },
+  "permissions": ["storage", "activeTab"]
 }
