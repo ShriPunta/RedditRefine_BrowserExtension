@@ -1,42 +1,23 @@
+// Import the text files
+import defaultKeywordsText from '../default_keywords.txt';
+import defaultSubredditsText from '../default_subreddits.txt';
+
 interface FilterSettings {
     keywords: string[];
     subreddits: string[];
     enabled: boolean;
 }
 
-const DEFAULT_KEYWORDS = [
-    'trump', 'biden', 'democrat', 'republican', 'congress', 'senate', 'election',
-    'vote', 'voting', 'political', 'politics', 'politician', 'government',
-    'conservative', 'liberal', 'leftist', 'rightist', 'fascist', 'communist',
-    'socialism', 'capitalism', 'impeach', 'campaign', 'ballot', 'maga',
-    'gop', 'dnc', 'rnc', 'president', 'vice president', 'governor', 'mayor',
-    'protest', 'rally', 'march', 'demonstration', 'activism', 'activist',
-    'immigration', 'border', 'refugee', 'climate change', 'global warming',
-    'healthcare', 'medicare', 'medicaid', 'obamacare', 'abortion', 'pro-life',
-    'pro-choice', 'gun control', 'second amendment', 'nra', 'tax', 'taxes',
-    'economy', 'inflation', 'recession', 'stimulus', 'welfare', 'social security',
-    'supreme court', 'scotus', 'justice', 'constitutional', 'amendment',
-    'freedom', 'liberty', 'patriot', 'nationalism', 'globalism', 'antifa',
-    'blm', 'black lives matter', 'white supremacy', 'racism', 'discrimination',
-    'lgbtq', 'transgender', 'gay rights', 'marriage equality', 'religious freedom',
-    'war', 'military', 'defense', 'nato', 'ukraine', 'russia', 'china',
-    'israel', 'palestine', 'middle east', 'foreign policy', 'sanctions',
-    'covid', 'coronavirus', 'pandemic', 'vaccine', 'mask mandate', 'lockdown',
-    'fauci', 'cdc', 'who', 'public health'
-];
+const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
 
-const DEFAULT_SUBREDDITS = [
-    'r/politics',
-    'r/politicalhumor',
-    'r/conservative',
-    'r/liberal',
-    'r/the_donald',
-    'r/socialism',
-    'r/libertarian',
-    'r/democrats',
-    'r/republican',
-    'r/politicaldiscussion'
-];
+const DEFAULT_SUBREDDITS = (defaultSubredditsText as string)
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(subreddit => `r/${subreddit}`); // Add r/ prefix back
 
 class PoliticalFilter {
     private settings: FilterSettings = {

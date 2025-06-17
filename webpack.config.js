@@ -1,11 +1,11 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/index.ts', // Replace with the path to your entry file
+  entry: './src/index.ts',
   mode: 'development',
   output: {
-    path: path.resolve(__dirname, 'dist'), // Output directory for bundled JavaScript
-    filename: 'index.js', // Output filename
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'index.js',
   },
   module: {
     rules: [
@@ -14,9 +14,13 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.txt$/,
+        type: 'asset/source',
+      },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js'], // Add .ts extension for TypeScript files
+    extensions: ['.ts', '.js', '.txt'],
   },
 };

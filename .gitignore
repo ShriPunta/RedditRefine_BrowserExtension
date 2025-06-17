@@ -2,3 +2,5 @@ node_modules/
 dist/
 LLM/repomix
 .DS_Store
+default_keywords.txt
+default_subreddits.txt
