@@ -3,9 +3,7 @@
   "name": "Reddit Posts and Subreddit Keyword Filter",
   "version": "1.0.0",
   "author": "ShriPunta",
-
   "description": "Removes posts matched by the configured filter from the reddit feed.",
-
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -14,8 +12,6 @@
     "96": "icons/icon-96.png",
     "128": "icons/icon-128.png"
   },
-
-  "homepage_url": "https://github.com/ShriPunta/RedditFilterFireFoxAddon",
   "content_scripts": [
     {
       "matches": [
@@ -36,12 +32,5 @@
       "64": "icons/icon-64.png"
     }
   },
-  "permissions": ["storage", "activeTab"],
-
-  "applications": {
-    "gecko": {
-      "id": "reddit-filter@ShriPunta",
-      "strict_min_version": "57.0"
-    }
-  }
+  "permissions": ["storage", "activeTab"]
 }
