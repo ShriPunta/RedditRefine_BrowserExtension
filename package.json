@@ -3,10 +3,15 @@
     "@types/firefox-webext-browser": "^120.0.3",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
+    "web-ext": "^8.9.0",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "build": "npx webpack --config webpack.config.js && cp src/popup.html src/popup.js dist/"
+    "web-ext:lint": "web-ext lint",
+    "web-ext:phone": "web-ext run -t firefox-android --firefox-apk org.mozilla.fenix",
+    "build": "npx webpack --config webpack.config.js && cp src/popup.html src/popup.js dist/",
+    "package": "npm run build && VERSION=$(node -p \"require('./manifest.json').version\") && zip -r \"releases/reddit-filter-addon-v$VERSION.zip\" manifest.json dist/ icons/ -x '*.DS_Store' '**/node_modules/*' '**/.git/*'",
+    "package:source": "VERSION=$(node -p \"require('./manifest.json').version\") && echo 'test' > default_keywords.txt && echo 'test' > default_subreddits.txt && zip -r \"releases/reddit-filter-source-v$VERSION.zip\" README.md package.json package-lock.json src/ manifest.json webpack.config.js tsconfig.json icons/ build.sh default_keywords.txt default_subreddits.txt -x '*.DS_Store' '**/node_modules/*' '**/.git/*' '**/dist/*' '**/releases/*' && rm -f default_keywords.txt default_subreddits.txt"
   }
 }
