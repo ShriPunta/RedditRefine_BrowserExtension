@@ -1,6 +1,24 @@
 # Reddit Posts and Subreddit Keyword Filter
 
-A Firefox WebExtension that filters Reddit posts based on configurable keywords and subreddits.
+A Firefox WebExtension that filters Reddit posts based on configurable keywords and subreddits, helping you maintain a cleaner and more focused browsing experience.
+
+## Motivation
+
+This extension was born from a personal need to improve the Reddit browsing experience. Like many users, I browse `reddit.com/r/all` to discover top-ranking content from across the platform. However, in recent years, I've noticed several concerning trends:
+
+- **Bot proliferation**: Automated accounts are increasingly dominating discussions
+- **Political content overflow**: Political posts are appearing in non-political subreddits where they don't belong
+- **Content displacement**: Authentic, organic user posts are being buried under algorithmic noise
+
+This extension helps restore the authentic Reddit experience by allowing you to filter out unwanted content while preserving the diverse, community-driven discussions that make Reddit valuable.
+
+## Features
+
+- **Keyword filtering**: Remove posts containing specific words or phrases
+- **Subreddit filtering**: Block entire subreddits from your feed
+- **Real-time filtering**: Content is filtered as you scroll
+- **Counter tracking**: See how many posts have been filtered (daily and total)
+- **Easy management**: Add/remove filters through a convenient popup interface
 
 ## Build Requirements
 
@@ -117,6 +135,30 @@ To verify the build succeeded:
 - Check browser console for error messages
 - Ensure manifest.json is in the root directory
 
+## Known Limitations
+
+- **Text-only filtering**: Currently only filters based on post titles and cannot analyze images or video content
+- **Manual keyword management**: Keywords must be manually updated as political landscapes and trending topics change
+- **False positives**: Be cautious with broad keywords that might filter legitimate content
+
+## Planned Improvements
+
+- **One-click subreddit filtering**: Add buttons to quickly filter subreddits directly from posts
+- **Image content analysis**: Explore options for filtering based on image content
+- **Smarter keyword suggestions**: Dynamic keyword recommendations based on current trends
+- **Import/export settings**: Share filter configurations between devices
+
+## Contributing
+
+This extension is open source and contributions are welcome! Whether you're reporting bugs, suggesting features, or submitting code improvements, your input helps make Reddit browsing better for everyone.
+
+## Support
+
+If you encounter issues or have suggestions:
+1. Check the troubleshooting section above
+2. Open an issue on GitHub
+3. Consider contributing a fix if you're technically inclined
+
 ## License
 
-This extension is provided as-is for Mozilla Add-on review purposes.
+This project is open source and available under the MIT License.
