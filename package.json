@@ -7,6 +7,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "build": "npx webpack --config webpack.config.js && cp src/popup.html src/popup.js dist/"
+    "build": "npx webpack --config webpack.config.js && cp src/popup.html src/popup.js dist/",
+    "package": "npm run build && VERSION=$(node -p \"require('./manifest.json').version\") && zip -r \"releases/reddit-filter-addon-v$VERSION.zip\" manifest.json dist/ icons/ -x '*.DS_Store' '**/node_modules/*' '**/.git/*'"
   }
 }

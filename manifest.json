@@ -1,13 +1,21 @@
 {
   "manifest_version": 2,
   "name": "Reddit Posts and Subreddit Keyword Filter",
-  "version": "1.0",
+  "version": "1.0.0",
+  "author": "ShriPunta",
 
   "description": "Removes posts matched by the configured filter from the reddit feed.",
 
   "icons": {
-    "48": "icons/border-48.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "64": "icons/icon-64.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
   },
+
+  "homepage_url": "https://github.com/ShriPunta/RedditFilterFireFoxAddon",
   "content_scripts": [
     {
       "matches": [
@@ -20,7 +28,20 @@
   ],
   "browser_action": {
     "default_popup": "dist/popup.html",
-    "default_title": "Filter Settings"
+    "default_title": "Reddit Filter Settings",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "64": "icons/icon-64.png"
+    }
   },
-  "permissions": ["storage", "activeTab"]
+  "permissions": ["storage", "activeTab"],
+
+  "applications": {
+    "gecko": {
+      "id": "reddit-filter@ShriPunta",
+      "strict_min_version": "57.0"
+    }
+  }
 }
