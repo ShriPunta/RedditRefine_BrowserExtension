@@ -1,16 +1,19 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 module.exports = {
   entry: {
     index: './src/index.ts',
     popup: './src/popup/popup.ts',
   },
-  mode: 'development',
-  devtool: 'source-map', // Use source-map instead of eval for WebExtension compatibility
+  mode: isProduction ? 'production' : 'development',
+  devtool: isProduction ? false : 'source-map', // No source maps in production
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
+    clean: true, // Clean dist folder before each build
   },
   plugins: [
     new MiniCssExtractPlugin({

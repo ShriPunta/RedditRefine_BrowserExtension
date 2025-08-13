@@ -64,13 +64,20 @@ if [ ! -f "dist/popup.js" ]; then
     exit 1
 fi
 
+if [ ! -f "dist/popup.css" ]; then
+    echo "❌ Build failed: dist/popup.css not found"
+    exit 1
+fi
+
 echo "✅ All required files present in dist/"
 echo ""
 
 # Display build summary
 echo "📊 Build Summary:"
-echo "   Source files compiled: src/index.ts → dist/index.js"
-echo "   Files copied: src/popup.html, src/popup.js → dist/"
+echo "   TypeScript compiled: src/index.ts → dist/index.js"
+echo "   TypeScript compiled: src/popup/popup.ts → dist/popup.js"
+echo "   CSS extracted: src/popup/popup.css → dist/popup.css"
+echo "   HTML copied: src/popup/popup.html → dist/popup.html"
 echo "   Extension ready for installation"
 echo ""
 
@@ -81,5 +88,10 @@ echo "   1. Load extension in Firefox: about:debugging → Load Temporary Add-on
 echo "   2. Select manifest.json to install"
 echo "   3. Test on Reddit pages"
 echo ""
-echo "📦 To create distribution package: npm run package"
-echo "📋 To create source package: npm run package:source"
+echo "🔧 Development build commands:"
+echo "   npm run build        - Development build with source maps"
+echo "   npm run build:prod   - Production build (optimized, no source maps)"
+echo ""
+echo "📦 Package commands:"
+echo "   npm run package      - Create distribution ZIP (uses production build)"
+echo "   npm run package:source - Create source code ZIP for review"
