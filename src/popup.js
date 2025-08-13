@@ -5,7 +5,9 @@ class PopupManager {
         this.filteredKeywords = [];
         this.filteredSubreddits = [];
         this.currentTab = 'keywords';
-        this.rateLimitInfo = { remaining: 100, reset: Date.now() + 600000 };
+        this.rateLimitInfo = { remaining: 500, reset: Date.now() + 600000, used: 0 };
+        this.rateLimitTimer = null;
+        this.isApiDetailsExpanded = false;
         this.init();
     }
 
@@ -43,6 +45,13 @@ class PopupManager {
         document.getElementById('enableFilter').checked = this.settings.enabled;
         this.filteredKeywords = [...this.settings.keywords];
         this.filteredSubreddits = [...this.settings.subreddits];
+        // Initialize age filter slider
+        const ageSlider = document.getElementById('ageSlider');
+        ageSlider.value = this.settings.minAccountAge || 12;
+        this.updateAgeDisplay(this.settings.minAccountAge || 12);
+
+        // Initialize API status
+        this.updateApiStatus();
     }
 
     async loadCounters() {
@@ -157,7 +166,29 @@ class PopupManager {
             }
         });
 
-        // Listen for counter updates from content script
+        // Age filter slider
+        document.getElementById('ageSlider').addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            this.settings.minAccountAge = value;
+            this.updateAgeDisplay(value);
+            this.saveSettings();
+        });
+
+        // API pause button
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            this.toggleApiPause();
+        });
+
+        // API details expand/collapse
+        document.getElementById('apiStatusHeader').addEventListener('click', () => {
+            this.toggleApiDetails();
+        });
+
+        document.getElementById('expandBtn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent header click
+            this.toggleApiDetails();
+        });
+
         // Listen for counter updates from content script
         if (typeof browser !== 'undefined' && browser.runtime) {
             browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -165,6 +196,10 @@ class PopupManager {
                     this.counters = message.counters;
                     this.updateCounterDisplay();
                     // Send acknowledgment
+                    sendResponse({ received: true });
+                } else if (message.type === 'rateLimitUpdate') {
+                    console.log(`📨 Popup received rate limit update:`, message);
+                    this.updateRateLimitInfo(message.remaining, message.reset, message.used);
                     sendResponse({ received: true });
                 }
                 // Return true to indicate we'll send a response asynchronously (even though we're doing it synchronously)
@@ -174,6 +209,9 @@ class PopupManager {
 
         // Refresh counters on popup open
         this.refreshCounters();
+
+        // Start rate limit countdown if needed
+        this.startRateLimitTimer();
     }
 
     async refreshCounters() {
@@ -339,6 +377,190 @@ class PopupManager {
     updateAllStats() {
         this.updateKeywordStats();
         this.updateSubredditStats();
+    }
+
+    // Age filter methods
+    updateAgeDisplay(months) {
+        const ageValue = document.getElementById('ageValue');
+        if (months < 12) {
+            ageValue.textContent = `${months} month${months === 1 ? '' : 's'}`;
+        } else {
+            const years = Math.floor(months / 12);
+            const remainingMonths = months % 12;
+            if (remainingMonths === 0) {
+                ageValue.textContent = `${years} year${years === 1 ? '' : 's'}`;
+            } else {
+                ageValue.textContent = `${years}y ${remainingMonths}m`;
+            }
+        }
+    }
+
+    // API status and rate limiting methods
+    updateApiStatus() {
+        const indicator = document.getElementById('apiIndicator');
+        const statusText = document.getElementById('apiStatusText');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        if (this.settings.apiPaused) {
+            indicator.className = 'api-indicator paused';
+            statusText.textContent = 'API Paused';
+            pauseBtn.textContent = 'Resume';
+            pauseBtn.classList.add('active');
+        } else if (this.rateLimitInfo.remaining <= 50) {
+            indicator.className = 'api-indicator limited';
+            statusText.textContent = 'Rate Limited';
+            pauseBtn.textContent = 'Pause';
+            pauseBtn.classList.remove('active');
+        } else {
+            indicator.className = 'api-indicator';
+            statusText.textContent = 'API Ready';
+            pauseBtn.textContent = 'Pause';
+            pauseBtn.classList.remove('active');
+        }
+    }
+
+    toggleApiPause() {
+        this.settings.apiPaused = !this.settings.apiPaused;
+        this.updateApiStatus();
+        this.saveSettings();
+
+        // Notify content script
+        this.notifyContentScript({ type: 'apiPauseToggled', paused: this.settings.apiPaused });
+    }
+
+    updateRateLimitInfo(remaining, reset, used = null) {
+        console.log(`🔄 Updating popup rate limit info: ${remaining}/${remaining + (used || 0)} (was: ${this.rateLimitInfo.remaining})`);
+        this.rateLimitInfo.remaining = remaining;
+        this.rateLimitInfo.reset = reset;
+        if (used !== null) {
+            this.rateLimitInfo.used = used;
+        }
+
+        const rateLimitInfo = document.getElementById('rateLimitInfo');
+        // Only show rate limit info if we have real data and it's low
+        if (remaining !== 500 && remaining <= 100) {
+            const resetTime = new Date(reset);
+            const now = new Date();
+            const minutesLeft = Math.ceil((resetTime - now) / 60000);
+            rateLimitInfo.textContent = `${remaining} left (${minutesLeft}m)`;
+        } else {
+            rateLimitInfo.textContent = '';
+        }
+
+        this.updateApiStatus();
+        this.updateRateLimitDisplay();
+        this.updateCooldownDisplay();
+    }
+
+    startRateLimitTimer() {
+        if (this.rateLimitTimer) {
+            clearInterval(this.rateLimitTimer);
+        }
+
+        this.rateLimitTimer = setInterval(() => {
+            const now = Date.now();
+            if (now < this.rateLimitInfo.reset) {
+                // Only update if we have actual data from content script (not initial constructor values)
+                if (this.rateLimitInfo.remaining !== 500 && this.rateLimitInfo.remaining <= 100) {
+                    const minutesLeft = Math.ceil((this.rateLimitInfo.reset - now) / 60000);
+                    const rateLimitInfo = document.getElementById('rateLimitInfo');
+                    rateLimitInfo.textContent = `${this.rateLimitInfo.remaining} left (${minutesLeft}m)`;
+                }
+
+                // Update detailed displays if expanded and we have real data
+                if (this.isApiDetailsExpanded && this.rateLimitInfo.remaining !== 500) {
+                    this.updateCooldownDisplay();
+                    this.updateRateLimitDisplay();
+                }
+            }
+        }, 5000); // Update every 5 seconds for better precision
+    }
+
+    toggleApiDetails() {
+        this.isApiDetailsExpanded = !this.isApiDetailsExpanded;
+        const apiDetails = document.getElementById('apiDetails');
+        const expandBtn = document.getElementById('expandBtn');
+
+        if (this.isApiDetailsExpanded) {
+            apiDetails.classList.add('expanded');
+            expandBtn.classList.add('expanded');
+            this.updateRateLimitDisplay();
+            this.updateCooldownDisplay();
+        } else {
+            apiDetails.classList.remove('expanded');
+            expandBtn.classList.remove('expanded');
+        }
+    }
+
+    updateRateLimitDisplay() {
+        const rateLimitValues = document.getElementById('rateLimitValues');
+        const rateLimitFill = document.getElementById('rateLimitFill');
+        const rateLimitLabel = document.getElementById('rateLimitLabel');
+
+        const remaining = this.rateLimitInfo.remaining;
+        const used = this.rateLimitInfo.used || 0;
+        const total = remaining + used; // Calculate total dynamically
+        const percentage = total > 0 ? (remaining / total) * 100 : 0;
+
+        rateLimitValues.textContent = `${remaining}/${total}`;
+        rateLimitFill.style.width = `${Math.max(percentage, 1)}%`; // Minimum 1% for visibility
+
+        // Update color based on remaining requests (absolute values for Reddit's higher limits)
+        rateLimitFill.className = 'progress-fill';
+        if (remaining <= 50) {
+            rateLimitFill.classList.add('danger');
+        } else if (remaining <= 100) {
+            rateLimitFill.classList.add('warning');
+        }
+
+        rateLimitLabel.textContent = `${remaining} requests remaining`;
+    }
+
+    updateCooldownDisplay() {
+        const cooldownTime = document.getElementById('cooldownTime');
+        const cooldownFill = document.getElementById('cooldownFill');
+        const cooldownLabel = document.getElementById('cooldownLabel');
+        const cooldownSection = document.getElementById('cooldownSection');
+
+        const now = Date.now();
+        const resetTime = this.rateLimitInfo.reset;
+
+        if (now >= resetTime) {
+            // Reset period has passed
+            cooldownSection.classList.add('hidden');
+            return;
+        }
+
+        cooldownSection.classList.remove('hidden');
+
+        const totalResetPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds  
+        const timeRemaining = resetTime - now;
+        const percentage = Math.max(0, (timeRemaining / totalResetPeriod) * 100);
+
+        // Format time remaining
+        const minutes = Math.floor(timeRemaining / 60000);
+        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        cooldownTime.textContent = timeString;
+        cooldownFill.style.width = `${percentage}%`;
+
+        if (minutes > 0) {
+            cooldownLabel.textContent = `Resets in ${minutes} minute${minutes === 1 ? '' : 's'}`;
+        } else {
+            cooldownLabel.textContent = `Resets in ${seconds} second${seconds === 1 ? '' : 's'}`;
+        }
+    }
+
+    async notifyContentScript(message) {
+        try {
+            const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+            if (tabs[0]) {
+                await browser.tabs.sendMessage(tabs[0].id, message);
+            }
+        } catch (error) {
+            // Silently ignore if content script not available
+        }
     }
 }
 

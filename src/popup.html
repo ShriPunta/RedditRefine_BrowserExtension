@@ -405,16 +405,32 @@
             .api-status-container {
                 background: #f8f9fa;
                 border-radius: 8px;
-                padding: 10px 12px;
                 margin-bottom: 12px;
                 border: 1px solid #e9ecef;
+                font-size: 12px;
+                overflow: hidden;
+            }
+
+            .api-status-header {
+                padding: 10px 12px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                font-size: 12px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+
+            .api-status-header:hover {
+                background: #e9ecef;
             }
 
             .api-status {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .api-controls {
                 display: flex;
                 align-items: center;
                 gap: 6px;
@@ -425,6 +441,7 @@
                 height: 8px;
                 border-radius: 50%;
                 background: #28a745;
+                transition: background-color 0.2s ease;
             }
 
             .api-indicator.paused {
@@ -438,6 +455,24 @@
             .rate-limit-info {
                 font-size: 11px;
                 color: #666;
+            }
+
+            .expand-btn {
+                background: transparent;
+                border: none;
+                color: #666;
+                cursor: pointer;
+                font-size: 10px;
+                padding: 2px 4px;
+                transition: transform 0.2s ease, color 0.2s ease;
+            }
+
+            .expand-btn:hover {
+                color: #333;
+            }
+
+            .expand-btn.expanded {
+                transform: rotate(180deg);
             }
 
             .pause-btn {
@@ -463,6 +498,91 @@
 
             .pause-btn.active:hover {
                 background: #218838;
+            }
+
+            .api-details {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease, padding 0.3s ease;
+                background: #fff;
+                border-top: 1px solid #e9ecef;
+            }
+
+            .api-details.expanded {
+                max-height: 200px;
+                padding: 12px;
+            }
+
+            .rate-limit-section,
+            .cooldown-section {
+                margin-bottom: 12px;
+            }
+
+            .cooldown-section:last-child {
+                margin-bottom: 0;
+            }
+
+            .rate-limit-header,
+            .cooldown-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 6px;
+            }
+
+            .rate-limit-title,
+            .cooldown-title {
+                font-size: 11px;
+                font-weight: 500;
+                color: #333;
+            }
+
+            .rate-limit-values,
+            .cooldown-time {
+                font-size: 11px;
+                font-weight: 600;
+                color: #667eea;
+            }
+
+            .progress-bar-container {
+                margin-bottom: 4px;
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 4px;
+                background: #e9ecef;
+                border-radius: 2px;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: #28a745;
+                border-radius: 2px;
+                transition: width 0.3s ease, background-color 0.3s ease;
+            }
+
+            .progress-fill.warning {
+                background: #ffc107;
+            }
+
+            .progress-fill.danger {
+                background: #dc3545;
+            }
+
+            .cooldown-fill {
+                background: #667eea;
+            }
+
+            .progress-label {
+                font-size: 10px;
+                color: #666;
+            }
+
+            .cooldown-section.hidden {
+                display: none;
             }
         </style>
     </head>
@@ -492,6 +612,94 @@
                             <span class="stat-number" id="dailyCounter">0</span>
                             today
                         </span>
+                    </div>
+                </div>
+                <div class="age-filter-container">
+                    <div class="age-filter-header">
+                        <span class="age-filter-title">👤 Min Account Age</span>
+                        <span class="age-value" id="ageValue">1 year</span>
+                    </div>
+                    <div class="slider-container">
+                        <input
+                            type="range"
+                            id="ageSlider"
+                            class="age-slider"
+                            min="1"
+                            max="60"
+                            value="12"
+                            step="1"
+                        >
+                        <div class="slider-labels">
+                            <span>1 month</span>
+                            <span>5 years</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="api-status-container">
+                    <div class="api-status-header" id="apiStatusHeader">
+                        <div class="api-status">
+                            <div class="api-indicator" id="apiIndicator"></div>
+                            <span id="apiStatusText">API Ready</span>
+                            <span
+                                class="rate-limit-info"
+                                id="rateLimitInfo"
+                            ></span>
+                        </div>
+                        <div class="api-controls">
+                            <button class="expand-btn" id="expandBtn">▼</button>
+                            <button class="pause-btn" id="pauseBtn">
+                                Pause
+                            </button>
+                        </div>
+                    </div>
+                    <div class="api-details" id="apiDetails">
+                        <div class="rate-limit-section">
+                            <div class="rate-limit-header">
+                                <span class="rate-limit-title"
+                                >Rate Limit Status</span>
+                                <span
+                                    class="rate-limit-values"
+                                    id="rateLimitValues"
+                                >100/100</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div
+                                    class="progress-bar"
+                                    id="rateLimitProgress"
+                                >
+                                    <div
+                                        class="progress-fill"
+                                        id="rateLimitFill"
+                                    >
+                                    </div>
+                                </div>
+                                <span class="progress-label" id="rateLimitLabel"
+                                >100 requests remaining</span>
+                            </div>
+                        </div>
+                        <div class="cooldown-section" id="cooldownSection">
+                            <div class="cooldown-header">
+                                <span class="cooldown-title"
+                                >Reset Countdown</span>
+                                <span class="cooldown-time" id="cooldownTime"
+                                >--:--</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div
+                                    class="progress-bar cooldown-bar"
+                                    id="cooldownProgress"
+                                >
+                                    <div
+                                        class="progress-fill cooldown-fill"
+                                        id="cooldownFill"
+                                    >
+                                    </div>
+                                </div>
+                                <span class="progress-label" id="cooldownLabel"
+                                >Resets in 10 minutes</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
