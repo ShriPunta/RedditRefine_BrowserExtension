@@ -1,7 +1,16 @@
 // Import the text files
 import defaultKeywordsText from '../default_keywords.txt';
 import defaultSubredditsText from '../default_subreddits.txt';
-
+interface Post {
+    url: string;
+    title: string;
+    tagName: string;
+    subreddit: string;
+    author: string;
+    shouldRemove: boolean;
+    removalReason: string;
+    matchedKeyword: string;
+}
 interface FilterSettings {
     keywords: string[];
     subreddits: string[];
@@ -57,7 +66,8 @@ class Filter {
         lastResetDate: new Date().toDateString()
     };
     private observer: MutationObserver | null = null;
-
+    private elementToPostMapProcessAsync: Map<Element, Post> = new Map();
+    private asyncPostProcessorFn: any = null;
     // Add this public getter method
     public getCounters(): CounterData {
         return { ...this.counters };
@@ -68,10 +78,41 @@ class Filter {
         await this.loadCounters();
         if (this.settings.enabled) {
             // For the first load, remove the posts
-            this.removePosts();
+            this.removePostsFirstPass();
             // Then set up the observer to handle infinite scrolling
+            // This method purely sets up the observer which adds elements to elementsToProcessPostMap
             this.setupObserver();
+
+            // Non blocking IO timeout which runs async and processes the elementsToProcessPostMap
+            if (!this.asyncPostProcessorFn) {
+                this.asyncPostProcessorFn = setInterval(() => {
+                    this.removePostsSecondPass();
+                }, 1000);
+            }
         }
+    }
+
+    private async removePostsSecondPass() {
+        // Convert Map to array for processing
+        const entries = Array.from(this.elementToPostMapProcessAsync.entries());
+
+        for (const [element, post] of entries) {
+            // Check if element still exists before processing
+            if (!document.contains(element)) {
+                this.elementToPostMapProcessAsync.delete(element);
+                continue;
+            }
+
+            try {
+                await this.parseAuthorFromElementCalcAge(element, post);
+                // Remove from map after processing (success or failure)
+                this.elementToPostMapProcessAsync.delete(element);
+            } catch (error) {
+                console.error('Error processing element:', error);
+                this.elementToPostMapProcessAsync.delete(element);
+            }
+        }
+
     }
 
     private async loadSettings(): Promise<void> {
@@ -160,7 +201,7 @@ class Filter {
             });
 
             if (shouldCheck) {
-                this.removePosts();
+                this.removePostsFirstPass();
             }
         });
 
@@ -170,98 +211,132 @@ class Filter {
         });
     }
 
-    private removePosts() {
-        const posts = document.querySelectorAll('article[aria-label], shreddit-post');
+    private convertElementToPost(ele: Element) {
+        let postInstance: Post = {
+            title: '',
+            url: '',
+            subreddit: '',
+            matchedKeyword: '',
+            author: '',
+            tagName: ele.tagName,
+            shouldRemove: false,
+            removalReason: '',
+        }
 
-        posts.forEach((post) => {
-            let shouldRemove = false;
-            let reason = '';
-            let matchedKeyword = '';
-            let postUrl = '';
-            let postTitle = '';
-
-            // Get post URL and title from shreddit-post attributes
-            const shredditPost = post.tagName === 'SHREDDIT-POST' ? post : post.querySelector('shreddit-post');
-            if (shredditPost) {
-                const permalink = shredditPost.getAttribute('permalink');
-                if (permalink) {
-                    postUrl = `https://www.reddit.com${permalink}`;
-                }
-                postTitle = shredditPost.getAttribute('post-title') || '';
+        // Get post URL and title from shreddit-post attributes
+        const shredditPost = postInstance.tagName === 'SHREDDIT-POST' ? ele : ele.querySelector('shreddit-post');
+        if (shredditPost) {
+            const permalink = shredditPost.getAttribute('permalink');
+            if (permalink) {
+                postInstance.url = `https://www.reddit.com${permalink}`;
             }
+            postInstance.title = shredditPost.getAttribute('post-title') || '';
+        }
 
-            // Check aria-label for filter keywords (for article elements)
-            if (post.tagName === 'ARTICLE') {
-                const ariaLabel = post.getAttribute('aria-label') || '';
-                postTitle = ariaLabel; // Use aria-label as title if we don't have it from shreddit-post
+        // Check aria-label for filter keywords (for article elements)
+        if (ele.tagName === 'ARTICLE') {
+            postInstance.title = ele.getAttribute('aria-label') || '';
+            const matchResult = this.findMatchingKeyword(postInstance.title);
+            if (matchResult) {
+                postInstance.shouldRemove = true;
+                postInstance.matchedKeyword = matchResult;
+                postInstance.removalReason = `keyword "${matchResult}" matched`;
+            }
+        }
+
+        // Check subreddit name (for both article and shreddit-post elements)
+        postInstance.subreddit = (ele.getAttribute('subreddit-prefixed-name') ||
+            (shredditPost ? shredditPost.getAttribute('subreddit-prefixed-name') : '')) ?? '';
+        if (postInstance.subreddit && this.isBlockedSubreddit(postInstance.subreddit)) {
+            postInstance.shouldRemove = true;
+            postInstance.removalReason = `blocked subreddit: ${postInstance.subreddit}`;
+        }
+        // If not filtered by subreddit, check for matching keyword in shreddit-post inside an article
+        if (!postInstance.shouldRemove && postInstance.tagName === 'SHREDDIT-POST') {
+            const parentArticle = ele.closest('article');
+            if (parentArticle) {
+                const ariaLabel = parentArticle.getAttribute('aria-label') || '';
+                if (!postInstance.title) postInstance.title = ariaLabel;
                 const matchResult = this.findMatchingKeyword(ariaLabel);
                 if (matchResult) {
-                    shouldRemove = true;
-                    matchedKeyword = matchResult;
-                    reason = `keyword "${matchedKeyword}" matched`;
+                    postInstance.shouldRemove = true;
+                    postInstance.matchedKeyword = matchResult;
+                    postInstance.removalReason = `keyword "${matchResult}" matched`;
                 }
             }
+        }
+        return postInstance;
+    }
 
-            // Check subreddit name (for both article and shreddit-post elements)
-            const subredditName = post.getAttribute('subreddit-prefixed-name') ||
-                (shredditPost ? shredditPost.getAttribute('subreddit-prefixed-name') : '');
-            if (subredditName && this.isBlockedSubreddit(subredditName)) {
-                shouldRemove = true;
-                reason = `blocked subreddit: ${subredditName}`;
-            }
-            // If not filtered by subreddit, check for matching keyword in shreddit-post inside an article
-            if (!shouldRemove && post.tagName === 'SHREDDIT-POST') {
-                const parentArticle = post.closest('article');
-                if (parentArticle) {
-                    const ariaLabel = parentArticle.getAttribute('aria-label') || '';
-                    if (!postTitle) postTitle = ariaLabel;
-                    const matchResult = this.findMatchingKeyword(ariaLabel);
-                    if (matchResult) {
-                        shouldRemove = true;
-                        matchedKeyword = matchResult;
-                        reason = `keyword "${matchedKeyword}" matched`;
+    private fetchArticleOrShredditPostsOnPage() {
+        return document.querySelectorAll('article[aria-label], shreddit-post');
+    }
+
+    private async parseAuthorFromElementCalcAge(ele: Element, post: Post) {
+        // If not filtered by keywords/subreddits, check user age (only for posts that would otherwise pass)
+        if (post.tagName === 'SHREDDIT-POST') {
+            post.author = ele.getAttribute('author') ?? '';
+            if (post.author) {
+                try {
+                    const createdAt = await this.fetchUserProfile(post.author);
+                    if (createdAt && this.isAccountTooYoung(createdAt)) {
+                        post.shouldRemove = true;
+                        const ageInMonths = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+                        post.removalReason = `account too young: ${post.author} (${ageInMonths.toFixed(1)} months old, minimum: ${this.settings.minAccountAge})`;
+
+                        this.logPostInConsole(post);
+
+                        this.removeElementOrClosestParentArticle(ele);
                     }
+                } catch (error) {
+                    console.error(`Error checking age for user ${post.author}:`, error);
                 }
             }
+        }
+    }
 
-            // If not filtered by keywords/subreddits, check user age (only for posts that would otherwise pass)
-            // if (!shouldRemove && shredditPost) {
-            //     const author = shredditPost.getAttribute('author');
-            //     if (author) {
-            //         try {
-            //             const createdAt = await this.fetchUserProfile(author);
-            //             if (createdAt && this.isAccountTooYoung(createdAt)) {
-            //                 shouldRemove = true;
-            //                 const ageInMonths = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-            //                 reason = `account too young: ${author} (${ageInMonths.toFixed(1)} months old, minimum: ${this.settings.minAccountAge})`;
-            //             }
-            //         } catch (error) {
-            //             console.error(`Error checking age for user ${author}:`, error);
-            //         }
-            //     }
-            // }
+    private removePostsFirstPass() {
+        const eles = this.fetchArticleOrShredditPostsOnPage();
 
-            if (shouldRemove) {
-                console.group('🛡️ FILTERED POST');
-                console.log(`📝 Title: "${postTitle}"`);
-                console.log(`🎯 Reason: ${reason}`);
-                if (postUrl) {
-                    console.log(`🔗 URL: ${postUrl}`);
-                }
-                console.log(`⏰ Time: ${new Date().toLocaleTimeString()}`);
-                console.groupEnd();
+        eles.forEach((ele) => {
+            const post = this.convertElementToPost(ele);
 
-                // Remove the top-level article if it exists, otherwise remove the post itself
-                const articleParent = post.closest('article');
-                const elementToRemove = articleParent || post;
-                elementToRemove.remove();
+
+
+            if (post.shouldRemove) {
+                this.logPostInConsole(post);
+
+                this.removeElementOrClosestParentArticle(ele);
 
                 // Increment counters
                 this.incrementCounters();
+            } else {
+                this.elementToPostMapProcessAsync.set(ele, post);
             }
         });
     }
 
+    private removeElementOrClosestParentArticle(ele: Element) {
+        // Remove the top-level article if it exists, otherwise remove the post itself
+        if (document.contains(ele)) {
+            // Safe to manipulate/remove
+            const articleParent = ele.closest('article');
+            const elementToRemove = articleParent || ele;
+            elementToRemove.remove();
+        }
+
+
+    }
+    private logPostInConsole(post: Post) {
+        console.group('🛡️ FILTERED POST');
+        console.log(`📝 Title: "${post.title}"`);
+        console.log(`🎯 Reason: ${post.removalReason}`);
+        if (post.url) {
+            console.log(`🔗 URL: ${post.url}`);
+        }
+        console.log(`⏰ Time: ${new Date().toLocaleTimeString()}`);
+        console.groupEnd();
+    }
     // Updated method with word boundaries to fix false positives
     private findMatchingKeyword(text: string): string | null {
         const lowerText = text.toLowerCase();
@@ -423,6 +498,10 @@ class Filter {
         if (this.observer) {
             this.observer.disconnect();
             this.observer = null;
+        }
+        if (this.asyncPostProcessorFn) {
+            clearInterval(this.asyncPostProcessorFn);
+            this.asyncPostProcessorFn = null;
         }
     }
 }
