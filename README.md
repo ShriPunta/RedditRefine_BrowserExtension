@@ -60,38 +60,56 @@ npm install
 ```
 
 ### Step 2: Build the Extension
+
+**Development Build (with source maps for debugging):**
 ```bash
 npm run build
 ```
 
-This command:
+**Production Build (optimized for distribution):**
+```bash
+npm run build:prod
+```
+
+The build process:
 1. Compiles TypeScript source code using webpack
-2. Bundles text files containing filter defaults
-3. Copies HTML and JavaScript files to `dist/` directory
-4. Creates optimized extension files ready for installation
+2. Extracts CSS from TypeScript imports
+3. Bundles text files containing filter defaults
+4. Copies HTML files to `dist/` directory
+5. Creates extension files ready for installation
 
 ### Step 3: Package for Distribution (Optional)
 ```bash
 npm run package
 ```
 
-This creates a ZIP file in the `releases/` directory ready for Mozilla Add-on submission.
+This command automatically uses the production build and creates a ZIP file in the `releases/` directory ready for Mozilla Add-on submission.
 
 ## Build Output
 
 The build process creates the following files in the `dist/` directory:
 - `index.js` - Compiled content script (from `src/index.ts`)
-- `popup.html` - Extension popup interface
-- `popup.js` - Popup functionality
+- `popup.js` - Compiled popup script (from `src/popup/popup.ts`)
+- `popup.css` - Extracted CSS styles (from `src/popup/popup.css`)
+- `popup.html` - Extension popup interface (from `src/popup/popup.html`)
 
 Additional files required for the extension:
 - `manifest.json` - Extension manifest
 - `icons/` - Extension icons in multiple sizes
+- `default_keywords.txt` - Default keyword filters
+- `default_subreddits.txt` - Default subreddit filters
 
 ## Development Scripts
 
-- `npm run build` - Build the extension
-- `npm run package` - Build and create distribution ZIP
+**Build Commands:**
+- `npm run build` - Development build with source maps
+- `npm run build:prod` - Production build (optimized, no source maps)
+
+**Package Commands:**
+- `npm run package` - Create distribution ZIP (uses production build)
+- `npm run package:source` - Create source code ZIP for review
+
+**Testing Commands:**
 - `npm run web-ext:lint` - Lint the extension using web-ext
 - `npm run web-ext:phone` - Test on Firefox for Android (requires adb setup)
 
@@ -100,40 +118,57 @@ Additional files required for the extension:
 ```
 src/
 ├── index.ts          # Main content script (TypeScript)
-├── popup.html        # Extension popup HTML
-├── popup.js          # Popup functionality (JavaScript)
-└── types.d.ts        # TypeScript type definitions
+├── defaults.ts       # Shared default values for keywords/subreddits
+├── types.d.ts        # TypeScript type definitions
+└── popup/            # Popup-related files
+    ├── popup.ts      # Popup functionality (TypeScript)
+    ├── popup.css     # Popup styles
+    └── popup.html    # Popup interface
 
 icons/                # Extension icons (multiple sizes)
 manifest.json         # Extension manifest
 webpack.config.js     # Webpack build configuration
 tsconfig.json         # TypeScript configuration
+default_keywords.txt  # Default keyword filters
+default_subreddits.txt # Default subreddit filters
 ```
 
 ## Build Process Details
 
-1. **TypeScript Compilation**: `src/index.ts` is compiled to JavaScript using webpack and ts-loader
-2. **Text File Bundling**: Default filter files are bundled as webpack assets
-3. **File Copying**: HTML and JS files are copied to the distribution directory
-4. **Asset Processing**: Icons and manifest are included in the final package
+1. **TypeScript Compilation**: Both `src/index.ts` and `src/popup/popup.ts` are compiled using webpack and ts-loader
+2. **CSS Extraction**: CSS is extracted from TypeScript imports using mini-css-extract-plugin
+3. **Text File Bundling**: Default filter files are bundled as webpack assets
+4. **File Copying**: HTML files are copied to the distribution directory
+5. **Asset Processing**: Icons and manifest are included in the final package
+6. **Optimization**: Production builds are minified and optimized (~50% smaller)
 
 ## Verification
 
 To verify the build succeeded:
-1. Check that `dist/` directory contains `index.js`, `popup.html`, and `popup.js`
+1. Check that `dist/` directory contains `index.js`, `popup.js`, `popup.css`, and `popup.html`
 2. Load the extension in Firefox using `about:debugging` → "Load Temporary Add-on" → select `manifest.json`
 3. Test functionality on Reddit pages
+4. Open the popup (extension icon) to verify interface loads without CSP errors
 
 ## Troubleshooting
 
 **Build fails with TypeScript errors:**
 - Ensure Node.js version 18+ is installed
 - Run `npm install` to ensure all dependencies are installed
+- Check that `default_keywords.txt` and `default_subreddits.txt` exist in the root directory
 
 **Extension doesn't load:**
 - Verify all files are present in `dist/` directory
 - Check browser console for error messages
 - Ensure manifest.json is in the root directory
+
+**Popup shows CSP errors:**
+- Ensure you're using the updated webpack config with `devtool: 'source-map'`
+- Use production build (`npm run build:prod`) for cleaner output
+
+**CSS not applying in popup:**
+- Verify `popup.css` is present in `dist/` directory
+- Check that `popup.html` includes `<link rel="stylesheet" href="popup.css">`
 
 ## Known Limitations
 

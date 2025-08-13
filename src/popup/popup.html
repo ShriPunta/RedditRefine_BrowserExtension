@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="popup.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>🛡️ Filter</h2>
+                <p>Keep your Reddit feed clean and focused</p>
+            </div>
+
+            <div class="content">
+                <div class="toggle-container">
+                    <label class="toggle">
+                        <input type="checkbox" id="enableFilter">
+                        <span>Enable Filter</span>
+                    </label>
+                </div>
+
+                <div class="stats-section">
+                    <div class="stats-compact">
+                        <span class="stat-item">
+                            📊 <span class="stat-number" id="totalCounter"
+                            >0</span> removed
+                        </span>
+                        <span class="stat-separator">•</span>
+                        <span class="stat-item">
+                            <span class="stat-number" id="dailyCounter">0</span>
+                            today
+                        </span>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="keywords">
+                        Keywords
+                    </button>
+                    <button class="tab" data-tab="subreddits">
+                        Subreddits
+                    </button>
+                </div>
+
+                <!-- Keywords Tab -->
+                <div class="tab-content active" id="keywords-tab">
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="keywordSearchInput"
+                            placeholder="🔍 Search keywords..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="keywordsContainer">
+                        <!-- Keywords will be populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <input
+                            type="text"
+                            class="add-input"
+                            id="keywordAddInput"
+                            placeholder="Add new keyword..."
+                        >
+                        <button class="add-btn" id="keywordAddBtn">Add</button>
+                    </div>
+
+                    <div class="item-stats" id="keywordStats">
+                        <!-- Stats will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Subreddits Tab -->
+                <div class="tab-content" id="subreddits-tab">
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="subredditSearchInput"
+                            placeholder="🔍 Search subreddits..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="subredditsContainer">
+                        <!-- Subreddits will be populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">r/</span>
+                            <input
+                                type="text"
+                                class="add-input prefixed-input"
+                                id="subredditAddInput"
+                                placeholder="subreddit name..."
+                            >
+                        </div>
+                        <button class="add-btn" id="subredditAddBtn">
+                            Add
+                        </button>
+                    </div>
+
+                    <div class="item-stats" id="subredditStats">
+                        <!-- Stats will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>

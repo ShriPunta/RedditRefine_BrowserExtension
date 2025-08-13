@@ -1,6 +1,6 @@
 // Import the text files
-import defaultKeywordsText from '../default_keywords.txt';
-import defaultSubredditsText from '../default_subreddits.txt';
+import { DEFAULT_SETTINGS } from './defaults';
+
 interface Post {
     url: string;
     title: string;
@@ -9,8 +9,8 @@ interface Post {
     author: string;
     shouldRemove: boolean;
     removalReason: string;
-    matchedKeyword: string;
 }
+
 interface FilterSettings {
     keywords: string[];
     subreddits: string[];
@@ -38,28 +38,8 @@ interface UserAgeCache {
     };
 }
 
-const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-
-const DEFAULT_SUBREDDITS = (defaultSubredditsText as string)
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .map(subreddit => `r/${subreddit}`); // Add r/ prefix back
-
 class Filter {
-    private settings: FilterSettings = {
-        keywords: DEFAULT_KEYWORDS,
-        subreddits: DEFAULT_SUBREDDITS,
-        enabled: true,
-        minAccountAge: 12, // default 1 year
-        apiPaused: false
-    };
-    private rateLimitInfo: RateLimitInfo = { remaining: 100, reset: Date.now() + 600000, used: 0 };
-    private userAgeCache: UserAgeCache = {};
-    private pendingRequests = new Set<string>();
+    private settings: FilterSettings = DEFAULT_SETTINGS;
     private counters: CounterData = {
         totalRemoved: 0,
         dailyRemoved: 0,
