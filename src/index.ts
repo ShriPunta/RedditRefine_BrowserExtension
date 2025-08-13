@@ -1,6 +1,4 @@
-// Import the text files
-import defaultKeywordsText from '../default_keywords.txt';
-import defaultSubredditsText from '../default_subreddits.txt';
+import { DEFAULT_SETTINGS } from './defaults';
 
 interface FilterSettings {
     keywords: string[];
@@ -14,23 +12,8 @@ interface CounterData {
     lastResetDate: string;
 }
 
-const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-
-const DEFAULT_SUBREDDITS = (defaultSubredditsText as string)
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .map(subreddit => `r/${subreddit}`); // Add r/ prefix back
-
 class Filter {
-    private settings: FilterSettings = {
-        keywords: DEFAULT_KEYWORDS,
-        subreddits: DEFAULT_SUBREDDITS,
-        enabled: true
-    };
+    private settings: FilterSettings = DEFAULT_SETTINGS;
     private counters: CounterData = {
         totalRemoved: 0,
         dailyRemoved: 0,

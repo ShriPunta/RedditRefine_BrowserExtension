@@ -7,6 +7,7 @@ module.exports = {
     popup: './src/popup/popup.ts',
   },
   mode: 'development',
+  devtool: 'source-map', // Use source-map instead of eval for WebExtension compatibility
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',

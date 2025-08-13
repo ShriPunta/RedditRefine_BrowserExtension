@@ -1,4 +1,5 @@
 import './popup.css';
+import { DEFAULT_SETTINGS } from '../defaults';
 
 interface FilterSettings {
     keywords: string[];
@@ -25,10 +26,10 @@ class PopupManager {
     private currentTab: string;
 
     constructor() {
-        this.settings = { keywords: [], subreddits: [], enabled: true };
+        this.settings = DEFAULT_SETTINGS;
         this.counters = { totalRemoved: 0, dailyRemoved: 0, lastResetDate: new Date().toDateString() };
-        this.filteredKeywords = [];
-        this.filteredSubreddits = [];
+        this.filteredKeywords = [...DEFAULT_SETTINGS.keywords];
+        this.filteredSubreddits = [...DEFAULT_SETTINGS.subreddits];
         this.currentTab = 'keywords';
         this.init();
     }
@@ -59,6 +60,9 @@ class PopupManager {
             const result = await browser.storage.local.get(['filterSettings']);
             if (result.filterSettings) {
                 this.settings = result.filterSettings;
+            } else {
+                // Save defaults to storage for next time
+                await this.saveSettings();
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
