@@ -16,5 +16,7 @@ export const DEFAULT_SUBREDDITS = (defaultSubredditsText as string)
 export const DEFAULT_SETTINGS = {
     keywords: DEFAULT_KEYWORDS,
     subreddits: DEFAULT_SUBREDDITS,
-    enabled: true
+    enabled: true,
+    minAccountAge: 12, // default 1 year
+    apiPaused: false
 };
