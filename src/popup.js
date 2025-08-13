@@ -1,10 +1,11 @@
 class PopupManager {
     constructor() {
-        this.settings = { keywords: [], subreddits: [], enabled: true };
+        this.settings = { keywords: [], subreddits: [], enabled: true, minAccountAge: 12, apiPaused: false };
         this.counters = { totalRemoved: 0, dailyRemoved: 0, lastResetDate: new Date().toDateString() };
         this.filteredKeywords = [];
         this.filteredSubreddits = [];
         this.currentTab = 'keywords';
+        this.rateLimitInfo = { remaining: 100, reset: Date.now() + 600000 };
         this.init();
     }
 

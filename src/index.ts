@@ -6,12 +6,27 @@ interface FilterSettings {
     keywords: string[];
     subreddits: string[];
     enabled: boolean;
+    minAccountAge: number; // in months
+    apiPaused: boolean;
 }
 
 interface CounterData {
     totalRemoved: number;
     dailyRemoved: number;
     lastResetDate: string;
+}
+
+interface RateLimitInfo {
+    remaining: number;
+    reset: number; // timestamp
+    used: number;
+}
+
+interface UserAgeCache {
+    [username: string]: {
+        createdAt: Date;
+        fetchedAt: Date;
+    };
 }
 
 const DEFAULT_KEYWORDS = (defaultKeywordsText as string)
@@ -29,8 +44,13 @@ class Filter {
     private settings: FilterSettings = {
         keywords: DEFAULT_KEYWORDS,
         subreddits: DEFAULT_SUBREDDITS,
-        enabled: true
+        enabled: true,
+        minAccountAge: 12, // default 1 year
+        apiPaused: false
     };
+    private rateLimitInfo: RateLimitInfo = { remaining: 100, reset: Date.now() + 600000, used: 0 };
+    private userAgeCache: UserAgeCache = {};
+    private pendingRequests = new Set<string>();
     private counters: CounterData = {
         totalRemoved: 0,
         dailyRemoved: 0,
@@ -47,7 +67,9 @@ class Filter {
         await this.loadSettings();
         await this.loadCounters();
         if (this.settings.enabled) {
+            // For the first load, remove the posts
             this.removePosts();
+            // Then set up the observer to handle infinite scrolling
             this.setupObserver();
         }
     }
@@ -148,7 +170,7 @@ class Filter {
         });
     }
 
-    private removePosts(): void {
+    private removePosts() {
         const posts = document.querySelectorAll('article[aria-label], shreddit-post');
 
         posts.forEach((post) => {
@@ -187,9 +209,8 @@ class Filter {
                 shouldRemove = true;
                 reason = `blocked subreddit: ${subredditName}`;
             }
-
-            // Also check if this is a shreddit-post inside an article
-            if (post.tagName === 'SHREDDIT-POST') {
+            // If not filtered by subreddit, check for matching keyword in shreddit-post inside an article
+            if (!shouldRemove && post.tagName === 'SHREDDIT-POST') {
                 const parentArticle = post.closest('article');
                 if (parentArticle) {
                     const ariaLabel = parentArticle.getAttribute('aria-label') || '';
@@ -202,6 +223,23 @@ class Filter {
                     }
                 }
             }
+
+            // If not filtered by keywords/subreddits, check user age (only for posts that would otherwise pass)
+            // if (!shouldRemove && shredditPost) {
+            //     const author = shredditPost.getAttribute('author');
+            //     if (author) {
+            //         try {
+            //             const createdAt = await this.fetchUserProfile(author);
+            //             if (createdAt && this.isAccountTooYoung(createdAt)) {
+            //                 shouldRemove = true;
+            //                 const ageInMonths = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+            //                 reason = `account too young: ${author} (${ageInMonths.toFixed(1)} months old, minimum: ${this.settings.minAccountAge})`;
+            //             }
+            //         } catch (error) {
+            //             console.error(`Error checking age for user ${author}:`, error);
+            //         }
+            //     }
+            // }
 
             if (shouldRemove) {
                 console.group('🛡️ FILTERED POST');
@@ -245,6 +283,142 @@ class Filter {
         );
     }
 
+    private async fetchUserProfile(username: string): Promise<Date | null> {
+        // Check cache first (cache for 1 hour)
+        const cached = this.userAgeCache[username];
+        if (cached && (Date.now() - cached.fetchedAt.getTime()) < 3600000) {
+            return cached.createdAt;
+        }
+
+        // Check if API is paused
+        if (this.settings.apiPaused) {
+            console.log(`🚫 API paused, skipping age check for user: ${username}`);
+            return null;
+        }
+
+        // Check rate limits
+        if (this.rateLimitInfo.remaining <= 5) {
+            console.log(`⚠️ Rate limit low (${this.rateLimitInfo.remaining}), skipping age check for user: ${username}`);
+            return null;
+        }
+
+        // Avoid duplicate requests
+        if (this.pendingRequests.has(username)) {
+            return null;
+        }
+
+        this.pendingRequests.add(username);
+
+        try {
+            const url = `https://www.reddit.com/svc/shreddit/profiles/profile-header-details/${username}`;
+            const response = await fetch(url, {
+                credentials: 'include', // Include session cookies
+                headers: {
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'User-Agent': navigator.userAgent
+                }
+            });
+
+            // Update rate limit info from response headers
+            this.updateRateLimitFromHeaders(response);
+
+            if (!response.ok) {
+                console.log(`❌ Failed to fetch user profile for ${username}: ${response.status}`);
+                return null;
+            }
+
+            const html = await response.text();
+            const createdAt = this.parseAccountCreationDate(html);
+
+            if (createdAt) {
+                // Cache the result
+                this.userAgeCache[username] = {
+                    createdAt,
+                    fetchedAt: new Date()
+                };
+                console.log(`✅ Fetched age for user ${username}: ${createdAt.toISOString()}`);
+            }
+
+            return createdAt;
+        } catch (error) {
+            console.error(`🚫 Error fetching user profile for ${username}:`, error);
+            return null;
+        } finally {
+            this.pendingRequests.delete(username);
+        }
+    }
+
+    private parseAccountCreationDate(html: string): Date | null {
+        try {
+            // Create a temporary DOM element to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+
+            // Look for the cake day element using the CSS selector path
+            const cakeDayElement = tempDiv.querySelector('div.flex:nth-child(3) > p:nth-child(1) > faceplate-tooltip:nth-child(1) > span:nth-child(1) > time:nth-child(1)');
+
+            if (!cakeDayElement) {
+                // Fallback: search for any time element with data-testid="cake-day"
+                const fallbackElement = tempDiv.querySelector('time[data-testid="cake-day"]');
+                if (fallbackElement) {
+                    const datetime = fallbackElement.getAttribute('datetime');
+                    if (datetime) {
+                        return new Date(datetime);
+                    }
+                }
+                console.log('❌ Could not find cake day element in user profile HTML');
+                return null;
+            }
+
+            const datetime = cakeDayElement.getAttribute('datetime');
+            if (!datetime) {
+                console.log('❌ No datetime attribute found on cake day element');
+                return null;
+            }
+
+            return new Date(datetime);
+        } catch (error) {
+            console.error('❌ Error parsing account creation date:', error);
+            return null;
+        }
+    }
+
+    private updateRateLimitFromHeaders(response: Response): void {
+        const remaining = response.headers.get('X-Ratelimit-Remaining');
+        const reset = response.headers.get('X-Ratelimit-Reset');
+        const used = response.headers.get('X-Ratelimit-Used');
+
+        if (remaining) {
+            this.rateLimitInfo.remaining = parseInt(remaining, 10);
+        }
+        if (reset) {
+            // Reset is in seconds, convert to timestamp
+            this.rateLimitInfo.reset = Date.now() + (parseInt(reset, 10) * 1000);
+        }
+        if (used) {
+            this.rateLimitInfo.used = parseInt(used, 10);
+        }
+
+        // Notify popup of rate limit update
+        try {
+            browser.runtime.sendMessage({
+                type: 'rateLimitUpdate',
+                remaining: this.rateLimitInfo.remaining,
+                reset: this.rateLimitInfo.reset
+            }).catch(() => {
+                // Ignore errors - popup might not be open
+            });
+        } catch (error) {
+            // Ignore errors
+        }
+    }
+
+    private isAccountTooYoung(createdAt: Date): boolean {
+        const now = new Date();
+        const ageInMonths = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24 * 30.44); // Average days per month
+        return ageInMonths < this.settings.minAccountAge;
+    }
+
     public destroy(): void {
         if (this.observer) {
             this.observer.disconnect();
@@ -282,6 +456,8 @@ if (typeof browser !== 'undefined' && browser.runtime) {
             } catch (error) {
                 // Ignore errors - popup might not be available
             }
+        } else if (message.type === 'apiPauseToggled') {
+            console.log(`🔄 API pause toggled: ${message.paused ? 'PAUSED' : 'RESUMED'}`);
         }
     });
 }
