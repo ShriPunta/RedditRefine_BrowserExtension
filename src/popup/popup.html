@@ -32,7 +32,94 @@
                         </span>
                     </div>
                 </div>
+                <div class="age-filter-container">
+                    <div class="age-filter-header">
+                        <span class="age-filter-title">👤 Min Account Age</span>
+                        <span class="age-value" id="ageValue">1 year</span>
+                    </div>
+                    <div class="slider-container">
+                        <input
+                            type="range"
+                            id="ageSlider"
+                            class="age-slider"
+                            min="1"
+                            max="60"
+                            value="12"
+                            step="1"
+                        >
+                        <div class="slider-labels">
+                            <span>1 month</span>
+                            <span>5 years</span>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="api-status-container">
+                    <div class="api-status-header" id="apiStatusHeader">
+                        <div class="api-status">
+                            <div class="api-indicator" id="apiIndicator"></div>
+                            <span id="apiStatusText">API Ready</span>
+                            <span
+                                class="rate-limit-info"
+                                id="rateLimitInfo"
+                            ></span>
+                        </div>
+                        <div class="api-controls">
+                            <button class="expand-btn" id="expandBtn">▼</button>
+                            <button class="pause-btn" id="pauseBtn">
+                                Pause
+                            </button>
+                        </div>
+                    </div>
+                    <div class="api-details" id="apiDetails">
+                        <div class="rate-limit-section">
+                            <div class="rate-limit-header">
+                                <span class="rate-limit-title"
+                                >Rate Limit Status</span>
+                                <span
+                                    class="rate-limit-values"
+                                    id="rateLimitValues"
+                                >100/100</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div
+                                    class="progress-bar"
+                                    id="rateLimitProgress"
+                                >
+                                    <div
+                                        class="progress-fill"
+                                        id="rateLimitFill"
+                                    >
+                                    </div>
+                                </div>
+                                <span class="progress-label" id="rateLimitLabel"
+                                >100 requests remaining</span>
+                            </div>
+                        </div>
+                        <div class="cooldown-section" id="cooldownSection">
+                            <div class="cooldown-header">
+                                <span class="cooldown-title"
+                                >Reset Countdown</span>
+                                <span class="cooldown-time" id="cooldownTime"
+                                >--:--</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div
+                                    class="progress-bar cooldown-bar"
+                                    id="cooldownProgress"
+                                >
+                                    <div
+                                        class="progress-fill cooldown-fill"
+                                        id="cooldownFill"
+                                    >
+                                    </div>
+                                </div>
+                                <span class="progress-label" id="cooldownLabel"
+                                >Resets in 10 minutes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="tabs">
                     <button class="tab active" data-tab="keywords">
                         Keywords

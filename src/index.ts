@@ -7,6 +7,7 @@ interface Post {
     tagName: string;
     subreddit: string;
     author: string;
+    matchedKeyword: string;
     shouldRemove: boolean;
     removalReason: string;
 }
@@ -45,6 +46,9 @@ class Filter {
         dailyRemoved: 0,
         lastResetDate: new Date().toDateString()
     };
+    private rateLimitInfo: RateLimitInfo = { remaining: 500, reset: Date.now() + 600000, used: 0 };
+    private userAgeCache: UserAgeCache = {};
+    private pendingRequests = new Set<string>();
     private observer: MutationObserver | null = null;
     private elementToPostMapProcessAsync: Map<Element, Post> = new Map();
     private asyncPostProcessorFn: any = null;
