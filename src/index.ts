@@ -26,12 +26,6 @@ interface CounterData {
     lastResetDate: string;
 }
 
-interface RateLimitInfo {
-    remaining: number;
-    reset: number; // timestamp
-    used: number;
-}
-
 interface UserAgeCache {
     [username: string]: {
         createdAt: Date;
@@ -46,7 +40,6 @@ class Filter {
         dailyRemoved: 0,
         lastResetDate: new Date().toDateString()
     };
-    private rateLimitInfo: RateLimitInfo = { remaining: 500, reset: Date.now() + 600000, used: 0 };
     private userAgeCache: UserAgeCache = {};
     private pendingRequests = new Set<string>();
     private observer: MutationObserver | null = null;
@@ -270,7 +263,7 @@ class Filter {
 
                         this.logPostInConsole(post);
 
-                        this.removeElementOrClosestParentArticle(ele);
+                        this.hideElementOrClosestParentArticle(ele);
                     }
                 } catch (error) {
                     console.error(`Error checking age for user ${post.author}:`, error);
@@ -290,7 +283,7 @@ class Filter {
             if (post.shouldRemove) {
                 this.logPostInConsole(post);
 
-                this.removeElementOrClosestParentArticle(ele);
+                this.hideElementOrClosestParentArticle(ele);
 
                 // Increment counters
                 this.incrementCounters();
@@ -300,13 +293,14 @@ class Filter {
         });
     }
 
-    private removeElementOrClosestParentArticle(ele: Element) {
+    private hideElementOrClosestParentArticle(ele: Element) {
         // Remove the top-level article if it exists, otherwise remove the post itself
         if (document.contains(ele)) {
             // Safe to manipulate/remove
             const articleParent = ele.closest('article');
             const elementToRemove = articleParent || ele;
-            elementToRemove.remove();
+            // elementToRemove.remove();
+            (elementToRemove as HTMLElement).style.visibility = "hidden";
         }
 
 
@@ -355,12 +349,6 @@ class Filter {
             return null;
         }
 
-        // Check rate limits
-        if (this.rateLimitInfo.remaining <= 5) {
-            console.log(`⚠️ Rate limit low (${this.rateLimitInfo.remaining}), skipping age check for user: ${username}`);
-            return null;
-        }
-
         // Avoid duplicate requests
         if (this.pendingRequests.has(username)) {
             return null;
@@ -377,9 +365,6 @@ class Filter {
                     'User-Agent': navigator.userAgent
                 }
             });
-
-            // Update rate limit info from response headers
-            this.updateRateLimitFromHeaders(response);
 
             if (!response.ok) {
                 console.log(`❌ Failed to fetch user profile for ${username}: ${response.status}`);
@@ -439,36 +424,6 @@ class Filter {
         } catch (error) {
             console.error('❌ Error parsing account creation date:', error);
             return null;
-        }
-    }
-
-    private updateRateLimitFromHeaders(response: Response): void {
-        const remaining = response.headers.get('X-Ratelimit-Remaining');
-        const reset = response.headers.get('X-Ratelimit-Reset');
-        const used = response.headers.get('X-Ratelimit-Used');
-
-        if (remaining) {
-            this.rateLimitInfo.remaining = parseInt(remaining, 10);
-        }
-        if (reset) {
-            // Reset is in seconds, convert to timestamp
-            this.rateLimitInfo.reset = Date.now() + (parseInt(reset, 10) * 1000);
-        }
-        if (used) {
-            this.rateLimitInfo.used = parseInt(used, 10);
-        }
-
-        // Notify popup of rate limit update
-        try {
-            browser.runtime.sendMessage({
-                type: 'rateLimitUpdate',
-                remaining: this.rateLimitInfo.remaining,
-                reset: this.rateLimitInfo.reset
-            }).catch(() => {
-                // Ignore errors - popup might not be open
-            });
-        } catch (error) {
-            // Ignore errors
         }
     }
 
