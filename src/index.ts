@@ -63,7 +63,7 @@ class Filter {
             if (!this.asyncPostProcessorFn) {
                 this.asyncPostProcessorFn = setInterval(() => {
                     this.removePostsSecondPass();
-                }, 1000);
+                }, 5000);
             }
         }
     }
