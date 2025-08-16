@@ -6,6 +6,7 @@ interface FilterSettings {
     subreddits: string[];
     enabled: boolean;
     minAccountAge: number;
+    accountAgeFilterEnabled: boolean;
 }
 
 interface FilterCounters {
@@ -21,6 +22,7 @@ interface Message {
     remaining?: number;
     reset?: number;
     used?: number;
+    enabled?: boolean;
 }
 
 class PopupManager {
@@ -80,12 +82,21 @@ class PopupManager {
         this.filteredKeywords = [...this.settings.keywords];
         this.filteredSubreddits = [...this.settings.subreddits];
 
+        // Initialize account age filter toggle
+        const accountAgeFilterEl = document.getElementById('enableAccountAgeFilter') as HTMLInputElement;
+        if (accountAgeFilterEl) {
+            accountAgeFilterEl.checked = this.settings.accountAgeFilterEnabled || false;
+        }
+
         // Initialize age filter slider
         const ageSlider = document.getElementById('ageSlider') as HTMLInputElement;
         if (ageSlider) {
             ageSlider.value = String(this.settings.minAccountAge || 12);
             this.updateAgeDisplay(this.settings.minAccountAge || 12);
         }
+
+        // Update UI state based on account age filter setting
+        this.updateAccountAgeFilterUI();
     }
 
     async loadCounters(): Promise<void> {
@@ -225,6 +236,23 @@ class PopupManager {
                 if (e.key === 'Enter') {
                     this.addSubreddit();
                 }
+            });
+        }
+
+        // Account age filter toggle
+        const accountAgeFilterEl = document.getElementById('enableAccountAgeFilter') as HTMLInputElement;
+        if (accountAgeFilterEl) {
+            accountAgeFilterEl.addEventListener('change', (e) => {
+                const target = e.target as HTMLInputElement;
+                this.settings.accountAgeFilterEnabled = target.checked;
+                this.updateAccountAgeFilterUI();
+                this.saveSettings();
+                
+                // Notify content script specifically about account age filter toggle
+                this.notifyContentScript({
+                    type: 'accountAgeFilterToggled',
+                    enabled: target.checked
+                });
             });
         }
 
@@ -448,7 +476,20 @@ class PopupManager {
         this.updateSubredditStats();
     }
 
-    // Age filter methods
+    // Account age filter methods
+    updateAccountAgeFilterUI(): void {
+        const ageFilterContainer = document.getElementById('ageFilterContainer');
+        if (!ageFilterContainer) return;
+        
+        if (this.settings.accountAgeFilterEnabled) {
+            ageFilterContainer.style.opacity = '1';
+            ageFilterContainer.style.pointerEvents = 'auto';
+        } else {
+            ageFilterContainer.style.opacity = '0.5';
+            ageFilterContainer.style.pointerEvents = 'none';
+        }
+    }
+
     updateAgeDisplay(months: number): void {
         const ageValue = document.getElementById('ageValue');
         if (!ageValue) return;
