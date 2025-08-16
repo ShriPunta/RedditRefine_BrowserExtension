@@ -1,0 +1,3 @@
+13 Aug 2025 - 1am
+- Still not working.The async operation isn't working and breaks the infinite scroll.
+- Maybe try doing all of these tasks as a background.js task, and send a remove event with the element name.
