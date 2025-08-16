@@ -17,7 +17,6 @@ interface FilterSettings {
     subreddits: string[];
     enabled: boolean;
     minAccountAge: number; // in months
-    apiPaused: boolean;
 }
 
 interface CounterData {
@@ -343,11 +342,6 @@ class Filter {
             return cached.createdAt;
         }
 
-        // Check if API is paused
-        if (this.settings.apiPaused) {
-            console.log(`🚫 API paused, skipping age check for user: ${username}`);
-            return null;
-        }
 
         // Avoid duplicate requests
         if (this.pendingRequests.has(username)) {
@@ -474,8 +468,6 @@ if (typeof browser !== 'undefined' && browser.runtime) {
             } catch (error) {
                 // Ignore errors - popup might not be available
             }
-        } else if (message.type === 'apiPauseToggled') {
-            console.log(`🔄 API pause toggled: ${message.paused ? 'PAUSED' : 'RESUMED'}`);
         }
     });
 }
