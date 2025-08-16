@@ -18,4 +18,5 @@ export const DEFAULT_SETTINGS = {
     subreddits: DEFAULT_SUBREDDITS,
     enabled: true,
     minAccountAge: 12, // default 1 year
+    accountAgeFilterEnabled: false, // disabled by default to avoid infinite scroll issues
 };

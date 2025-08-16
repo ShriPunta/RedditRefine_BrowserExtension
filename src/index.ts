@@ -17,6 +17,7 @@ interface FilterSettings {
     subreddits: string[];
     enabled: boolean;
     minAccountAge: number; // in months
+    accountAgeFilterEnabled: boolean;
 }
 
 interface CounterData {
@@ -33,7 +34,7 @@ interface UserAgeCache {
 }
 
 class Filter {
-    private settings: FilterSettings = DEFAULT_SETTINGS;
+    public settings: FilterSettings = DEFAULT_SETTINGS;
     private counters: CounterData = {
         totalRemoved: 0,
         dailyRemoved: 0,
@@ -59,16 +60,37 @@ class Filter {
             // This method purely sets up the observer which adds elements to elementsToProcessPostMap
             this.setupObserver();
 
-            // Non blocking IO timeout which runs async and processes the elementsToProcessPostMap
-            if (!this.asyncPostProcessorFn) {
-                this.asyncPostProcessorFn = setInterval(() => {
-                    this.removePostsSecondPass();
-                }, 5000);
-            }
+            // Start async processor only if account age filter is enabled
+            this.updateAsyncProcessor();
+        }
+    }
+
+    public updateAsyncProcessor(): void {
+        // Stop existing processor if running
+        if (this.asyncPostProcessorFn) {
+            clearInterval(this.asyncPostProcessorFn);
+            this.asyncPostProcessorFn = null;
+        }
+
+        // Start processor only if account age filter is enabled
+        if (this.settings.accountAgeFilterEnabled) {
+            console.log('🔄 Starting async account age processor');
+            this.asyncPostProcessorFn = setInterval(() => {
+                this.removePostsSecondPass();
+            }, 2000);
+        } else {
+            console.log('⏸️ Account age filter disabled - async processor stopped');
+            // Clear the pending map since we're not processing it
+            this.elementToPostMapProcessAsync.clear();
         }
     }
 
     private async removePostsSecondPass() {
+        // Only run if account age filter is enabled
+        if (!this.settings.accountAgeFilterEnabled) {
+            return;
+        }
+
         // Convert Map to array for processing
         const entries = Array.from(this.elementToPostMapProcessAsync.entries());
 
@@ -88,7 +110,6 @@ class Filter {
                 this.elementToPostMapProcessAsync.delete(element);
             }
         }
-
     }
 
     private async loadSettings(): Promise<void> {
@@ -286,7 +307,8 @@ class Filter {
 
                 // Increment counters
                 this.incrementCounters();
-            } else {
+            } else if (this.settings.accountAgeFilterEnabled) {
+                // Only add to async processing if account age filter is enabled
                 this.elementToPostMapProcessAsync.set(ele, post);
             }
         });
@@ -456,6 +478,12 @@ if (typeof browser !== 'undefined' && browser.runtime) {
                 filter.destroy();
             }
             main();
+        } else if (message.type === 'accountAgeFilterToggled') {
+            if (filter) {
+                // Update the setting and restart async processor
+                filter.settings.accountAgeFilterEnabled = message.enabled;
+                filter.updateAsyncProcessor();
+            }
         } else if (message.type === 'requestCounters') {
             // Send current counter data to popup
             try {
