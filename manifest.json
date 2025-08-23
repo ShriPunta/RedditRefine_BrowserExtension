@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Reddit Posts and Subreddit Keyword Filter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "ShriPunta",
   "description": "Removes posts matched by the configured filter from the reddit feed.",
   "icons": {
@@ -15,8 +15,26 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.reddit.com/r/*",
-        "https://www.reddit.com/user/*"
+        "*://www.reddit.com/",
+        "*://reddit.com/",
+        "*://www.reddit.com/r/all*",
+        "*://reddit.com/r/all*",
+        "*://www.reddit.com/r/popular*",
+        "*://reddit.com/r/popular*",
+        "*://www.reddit.com/user/*",
+        "*://reddit.com/user/*",
+        "*://www.reddit.com/u/*",
+        "*://reddit.com/u/*",
+        "*://www.reddit.com/best*",
+        "*://reddit.com/best*",
+        "*://www.reddit.com/hot*",
+        "*://reddit.com/hot*",
+        "*://www.reddit.com/new*",
+        "*://reddit.com/new*",
+        "*://www.reddit.com/rising*",
+        "*://reddit.com/rising*",
+        "*://www.reddit.com/search*",
+        "*://reddit.com/search*"
       ],
       "js": ["dist/index.js"],
       "run_at": "document_idle"
