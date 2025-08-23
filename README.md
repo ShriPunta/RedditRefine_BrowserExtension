@@ -19,6 +19,9 @@ This extension helps restore the authentic Reddit experience by allowing you to 
 - **Real-time filtering**: Content is filtered as you scroll
 - **Counter tracking**: See how many posts have been filtered (daily and total)
 - **Easy management**: Add/remove filters through a convenient popup interface
+- **Post collapse with reasons** (v1.2.0): Filtered posts are collapsed with show/hide buttons and display why they were filtered
+- **Video autoplay prevention**: Videos in collapsed posts are automatically paused
+- **Smart targeting**: Only runs on feeds (r/all, homepage, user profiles) - skips specific subreddit pages
 
 ## Build Requirements
 

@@ -101,6 +101,13 @@ class Filter {
                 continue;
             }
 
+            // Skip posts that have been manually expanded by the user
+            const articleParent = element.closest('article') || element;
+            if (articleParent.getAttribute('data-reddit-filter-expanded') === 'true') {
+                this.elementToPostMapProcessAsync.delete(element);
+                continue;
+            }
+
             try {
                 await this.parseAuthorFromElementCalcAge(element, post);
                 // Remove from map after processing (success or failure)
@@ -296,9 +303,13 @@ class Filter {
         const eles = this.fetchArticleOrShredditPostsOnPage();
 
         eles.forEach((ele) => {
+            // Skip posts that have been manually expanded by the user
+            const articleParent = ele.closest('article') || ele;
+            if (articleParent.getAttribute('data-reddit-filter-expanded') === 'true') {
+                return;
+            }
+
             const post = this.convertElementToPost(ele);
-
-
 
             if (post.shouldRemove) {
                 this.logPostInConsole(post);
@@ -386,14 +397,16 @@ class Filter {
             const isCollapsed = (htmlElement as any)._isCollapsed;
 
             if (isCollapsed) {
-                // Show post
+                // Show post - mark as user-expanded to prevent re-collapsing
                 htmlElement.innerHTML = (htmlElement as any)._originalContent;
+                htmlElement.setAttribute('data-reddit-filter-expanded', 'true');
                 (htmlElement as any)._isCollapsed = false;
             } else {
-                // Hide post
+                // Hide post - remove the expansion marker
                 this.pauseVideosInPost(htmlElement);
                 htmlElement.innerHTML = '';
                 htmlElement.appendChild(banner);
+                htmlElement.removeAttribute('data-reddit-filter-expanded');
                 (htmlElement as any)._isCollapsed = true;
             }
 
