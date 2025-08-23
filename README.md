@@ -16,12 +16,14 @@ This extension helps restore the authentic Reddit experience by allowing you to 
 
 - **Keyword filtering**: Remove posts containing specific words or phrases
 - **Subreddit filtering**: Block entire subreddits from your feed
+- **Account age filtering**: Filter posts from accounts younger than a specified age (optional)
 - **Real-time filtering**: Content is filtered as you scroll
 - **Counter tracking**: See how many posts have been filtered (daily and total)
 - **Easy management**: Add/remove filters through a convenient popup interface
 - **Post collapse with reasons** (v1.2.0): Filtered posts are collapsed with show/hide buttons and display why they were filtered
 - **Video autoplay prevention**: Videos in collapsed posts are automatically paused
 - **Smart targeting**: Only runs on feeds (r/all, homepage, user profiles) - skips specific subreddit pages
+- **TypeScript interface**: Modern popup built with TypeScript for better reliability
 
 ## Build Requirements
 
@@ -179,12 +181,46 @@ To verify the build succeeded:
 - **Manual keyword management**: Keywords must be manually updated as political landscapes and trending topics change
 - **False positives**: Be cautious with broad keywords that might filter legitimate content
 
+## Account Age Filtering
+
+The extension now includes an optional **Account Age Filter** that can remove posts from newly created accounts. This feature helps reduce spam and bot activity.
+
+### How it works:
+- **Toggle control**: Enable/disable account age filtering in the popup
+- **Configurable threshold**: Set minimum account age (1 month to 5 years)
+- **Smart processing**: Only checks account ages when needed to avoid performance issues
+- **Default disabled**: Feature is disabled by default to prevent any infinite scroll issues
+
+### Configuration:
+1. Open the extension popup
+2. Toggle "Account Age Filter" on/off
+3. Adjust the "Min Account Age" slider (when enabled)
+4. Changes take effect immediately
+
+**Note**: This feature makes API requests to Reddit to check account creation dates. It can be disabled if you experience any issues.
+
 ## Planned Improvements
 
 - **One-click subreddit filtering**: Add buttons to quickly filter subreddits directly from posts
 - **Image content analysis**: Explore options for filtering based on image content
 - **Smarter keyword suggestions**: Dynamic keyword recommendations based on current trends
 - **Import/export settings**: Share filter configurations between devices
+
+## Changelog
+
+### Version 1.1.0 (Current)
+- ✨ **New Feature**: Account Age Filtering - Filter posts from accounts younger than a specified age
+- 🔧 **Technical**: Migrated popup interface from vanilla JavaScript to TypeScript
+- 🎨 **UI Enhancement**: Added toggle control for account age filter with visual feedback
+- ⚙️ **Performance**: Optimized async processing with configurable on/off switch
+- 🛠️ **Build System**: Enhanced webpack configuration with CSS extraction and TypeScript compilation
+- 🐛 **Stability**: Improved error handling and race condition prevention
+
+### Version 1.0.x (Previous)
+- Basic keyword and subreddit filtering
+- Real-time post removal
+- Statistics tracking
+- Popup interface for filter management
 
 ## Contributing
 
