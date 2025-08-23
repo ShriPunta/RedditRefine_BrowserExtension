@@ -101,6 +101,13 @@ class Filter {
                 continue;
             }
 
+            // Skip posts that have been manually expanded by the user
+            const articleParent = element.closest('article') || element;
+            if (articleParent.getAttribute('data-reddit-filter-expanded') === 'true') {
+                this.elementToPostMapProcessAsync.delete(element);
+                continue;
+            }
+
             try {
                 await this.parseAuthorFromElementCalcAge(element, post);
                 // Remove from map after processing (success or failure)
@@ -283,7 +290,7 @@ class Filter {
 
                         this.logPostInConsole(post);
 
-                        this.hideElementOrClosestParentArticle(ele);
+                        this.hideElementOrClosestParentArticle(ele, post.removalReason);
                     }
                 } catch (error) {
                     console.error(`Error checking age for user ${post.author}:`, error);
@@ -296,14 +303,18 @@ class Filter {
         const eles = this.fetchArticleOrShredditPostsOnPage();
 
         eles.forEach((ele) => {
+            // Skip posts that have been manually expanded by the user
+            const articleParent = ele.closest('article') || ele;
+            if (articleParent.getAttribute('data-reddit-filter-expanded') === 'true') {
+                return;
+            }
+
             const post = this.convertElementToPost(ele);
-
-
 
             if (post.shouldRemove) {
                 this.logPostInConsole(post);
 
-                this.hideElementOrClosestParentArticle(ele);
+                this.hideElementOrClosestParentArticle(ele, post.removalReason);
 
                 // Increment counters
                 this.incrementCounters();
@@ -314,17 +325,118 @@ class Filter {
         });
     }
 
-    private hideElementOrClosestParentArticle(ele: Element) {
-        // Remove the top-level article if it exists, otherwise remove the post itself
-        if (document.contains(ele)) {
-            // Safe to manipulate/remove
-            const articleParent = ele.closest('article');
-            const elementToRemove = articleParent || ele;
-            // elementToRemove.remove();
-            (elementToRemove as HTMLElement).style.visibility = "hidden";
+    private hideElementOrClosestParentArticle(ele: Element, reason: string = '') {
+        this.collapsePost(ele, reason);
+    }
+
+    private collapsePost(ele: Element, reason: string) {
+        if (!document.contains(ele)) return;
+
+        const articleParent = ele.closest('article');
+        const elementToCollapse = articleParent || ele;
+        const htmlElement = elementToCollapse as HTMLElement;
+
+        // Check if already collapsed to avoid duplicate processing
+        if (htmlElement.querySelector('.reddit-filter-collapse-banner')) {
+            return;
         }
 
+        // Stop video autoplay by pausing all videos in the post
+        this.pauseVideosInPost(htmlElement);
 
+        // Create collapse banner
+        const banner = document.createElement('div');
+        banner.className = 'reddit-filter-collapse-banner';
+        banner.style.cssText = `
+            background-color: #f6f7f8;
+            border: 1px solid #edeff1;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            font-size: 12px;
+            color: #7c7c83;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+
+        // Create the reason text
+        const reasonText = document.createElement('span');
+        reasonText.textContent = `Post filtered: ${reason}`;
+
+        // Create the show/hide button
+        const toggleButton = document.createElement('button');
+        toggleButton.textContent = 'Show';
+        toggleButton.style.cssText = `
+            background: none;
+            border: 1px solid #0079d3;
+            color: #0079d3;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 11px;
+            cursor: pointer;
+        `;
+
+        banner.appendChild(reasonText);
+        banner.appendChild(toggleButton);
+
+        // Hide the original post content
+        htmlElement.style.cssText = 'position: relative;';
+        const originalContent = htmlElement.innerHTML;
+        htmlElement.innerHTML = '';
+        htmlElement.appendChild(banner);
+
+        // Store original content and collapsed state
+        (htmlElement as any)._originalContent = originalContent;
+        (htmlElement as any)._isCollapsed = true;
+
+        // Add click handler for toggle
+        const togglePost = () => {
+            const isCollapsed = (htmlElement as any)._isCollapsed;
+
+            if (isCollapsed) {
+                // Show post - mark as user-expanded to prevent re-collapsing
+                htmlElement.innerHTML = (htmlElement as any)._originalContent;
+                htmlElement.setAttribute('data-reddit-filter-expanded', 'true');
+                (htmlElement as any)._isCollapsed = false;
+            } else {
+                // Hide post - remove the expansion marker
+                this.pauseVideosInPost(htmlElement);
+                htmlElement.innerHTML = '';
+                htmlElement.appendChild(banner);
+                htmlElement.removeAttribute('data-reddit-filter-expanded');
+                (htmlElement as any)._isCollapsed = true;
+            }
+
+            toggleButton.textContent = (htmlElement as any)._isCollapsed ? 'Show' : 'Hide';
+        };
+
+        banner.addEventListener('click', togglePost);
+        toggleButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePost();
+        });
+    }
+
+    private pauseVideosInPost(element: HTMLElement) {
+        // Find and pause all video elements
+        const videos = element.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.currentTime = 0;
+        });
+
+        // Also handle Reddit's video players
+        const redditVideos = element.querySelectorAll('shreddit-player');
+        redditVideos.forEach(player => {
+            const video = player.querySelector('video');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+        });
     }
     private logPostInConsole(post: Post) {
         console.group('🛡️ FILTERED POST');
@@ -464,7 +576,7 @@ class Filter {
 let filter: Filter | null = null;
 
 const main = () => {
-    console.log(" Filter Extension loaded");
+    console.log("✅ Reddit Filter Extension loaded");
     filter = new Filter();
     filter.init();
 };
