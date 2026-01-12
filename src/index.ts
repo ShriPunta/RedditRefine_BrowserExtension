@@ -1,4 +1,5 @@
 // Import the text files
+import browser from 'webextension-polyfill';
 import { DEFAULT_SETTINGS } from './defaults';
 
 interface Post {
@@ -582,21 +583,26 @@ const main = () => {
 };
 
 // Listen for settings updates from popup
-// Listen for settings updates from popup
-if (typeof browser !== 'undefined' && browser.runtime) {
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.type === 'settingsUpdated') {
+interface ContentMessage {
+    type: string;
+    enabled?: boolean;
+}
+
+if (browser.runtime) {
+    browser.runtime.onMessage.addListener((message: unknown) => {
+        const msg = message as ContentMessage;
+        if (msg.type === 'settingsUpdated') {
             if (filter) {
                 filter.destroy();
             }
             main();
-        } else if (message.type === 'accountAgeFilterToggled') {
+        } else if (msg.type === 'accountAgeFilterToggled') {
             if (filter) {
                 // Update the setting and restart async processor
-                filter.settings.accountAgeFilterEnabled = message.enabled;
+                filter.settings.accountAgeFilterEnabled = msg.enabled ?? false;
                 filter.updateAsyncProcessor();
             }
-        } else if (message.type === 'requestCounters') {
+        } else if (msg.type === 'requestCounters') {
             // Send current counter data to popup
             try {
                 browser.runtime.sendMessage({
