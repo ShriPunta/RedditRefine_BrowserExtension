@@ -1,6 +1,6 @@
 # Reddit Posts and Subreddit Keyword Filter
 
-A Firefox WebExtension that filters Reddit posts based on configurable keywords and subreddits, helping you maintain a cleaner and more focused browsing experience.
+A cross-browser extension (Chrome & Firefox) that filters Reddit posts based on configurable keywords and subreddits, helping you maintain a cleaner and more focused browsing experience.
 
 ## Motivation
 
@@ -66,9 +66,11 @@ npm install
 
 ### Step 2: Build the Extension
 
-**Development Build (with source maps for debugging):**
+**Development Build (defaults to Chrome):**
 ```bash
-npm run build
+npm run build              # Builds for Chrome
+npm run build:firefox      # Builds for Firefox
+npm run build:chrome       # Builds for Chrome (explicit)
 ```
 
 **Production Build (optimized for distribution):**
@@ -80,19 +82,21 @@ The build process:
 1. Compiles TypeScript source code using webpack
 2. Extracts CSS from TypeScript imports
 3. Bundles text files containing filter defaults
-4. Copies HTML files to `dist/` directory
+4. Copies HTML files and appropriate manifest to `dist/chrome` or `dist/firefox` directory
 5. Creates extension files ready for installation
 
 ### Step 3: Package for Distribution (Optional)
 ```bash
-npm run package
+npm run package          # Packages Firefox version
+npm run package:firefox  # Packages Firefox version (explicit)
+npm run package:chrome   # Packages Chrome version
 ```
 
-This command automatically uses the production build and creates a ZIP file in the `releases/` directory ready for Mozilla Add-on submission.
+These commands create ZIP files in the `releases/` directory ready for browser store submission.
 
 ## Build Output
 
-The build process creates the following files in the `dist/` directory:
+The build process creates the following files in the `dist/chrome` or `dist/firefox` directory:
 - `index.js` - Compiled content script (from `src/index.ts`)
 - `popup.js` - Compiled popup script (from `src/popup/popup.ts`)
 - `popup.css` - Extracted CSS styles (from `src/popup/popup.css`)
@@ -107,11 +111,15 @@ Additional files required for the extension:
 ## Development Scripts
 
 **Build Commands:**
-- `npm run build` - Development build with source maps
+- `npm run build` - Development build for Chrome (default)
+- `npm run build:firefox` - Development build for Firefox
+- `npm run build:chrome` - Development build for Chrome
 - `npm run build:prod` - Production build (optimized, no source maps)
 
 **Package Commands:**
-- `npm run package` - Create distribution ZIP (uses production build)
+- `npm run package` - Create Firefox distribution ZIP
+- `npm run package:firefox` - Create Firefox distribution ZIP (explicit)
+- `npm run package:chrome` - Create Chrome distribution ZIP
 - `npm run package:source` - Create source code ZIP for review
 
 **Testing Commands:**
@@ -151,7 +159,9 @@ default_subreddits.txt # Default subreddit filters
 
 To verify the build succeeded:
 1. Check that `dist/` directory contains `index.js`, `popup.js`, `popup.css`, and `popup.html`
-2. Load the extension in Firefox using `about:debugging` → "Load Temporary Add-on" → select `manifest.json`
+2. Load the extension:
+   - **Firefox**: `about:debugging` → "Load Temporary Add-on" → select `manifest.json`
+   - **Chrome**: `chrome://extensions` → Enable "Developer mode" → "Load unpacked" → select `dist/chrome` folder
 3. Test functionality on Reddit pages
 4. Open the popup (extension icon) to verify interface loads without CSP errors
 

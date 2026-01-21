@@ -36,12 +36,14 @@
         "*://www.reddit.com/search*",
         "*://reddit.com/search*"
       ],
-      "js": ["dist/index.js"],
+      "js": [
+        "index.js"
+      ],
       "run_at": "document_idle"
     }
   ],
   "browser_action": {
-    "default_popup": "dist/popup.html",
+    "default_popup": "popup.html",
     "default_title": "Reddit Filter Settings",
     "default_icon": {
       "16": "icons/icon-16.png",
@@ -50,7 +52,10 @@
       "64": "icons/icon-64.png"
     }
   },
-  "permissions": ["storage", "activeTab"],
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
   "browser_specific_settings": {
     "gecko": {
       "id": "reddit-filter@ShriPunta",
