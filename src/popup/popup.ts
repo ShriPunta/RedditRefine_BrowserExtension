@@ -1,4 +1,5 @@
 import './popup.css';
+import browser from 'webextension-polyfill';
 import { DEFAULT_SETTINGS } from '../defaults';
 
 interface FilterSettings {
@@ -66,7 +67,7 @@ class PopupManager {
         try {
             const result = await browser.storage.local.get(['filterSettings']);
             if (result.filterSettings) {
-                this.settings = result.filterSettings;
+                this.settings = result.filterSettings as FilterSettings;
             } else {
                 // Save defaults to storage for next time
                 await this.saveSettings();
@@ -103,7 +104,7 @@ class PopupManager {
         try {
             const result = await browser.storage.local.get(['filterCounters']);
             if (result.filterCounters) {
-                this.counters = result.filterCounters;
+                this.counters = result.filterCounters as FilterCounters;
 
                 // Reset daily counter if it's a new day
                 const today = new Date().toDateString();
@@ -247,7 +248,7 @@ class PopupManager {
                 this.settings.accountAgeFilterEnabled = target.checked;
                 this.updateAccountAgeFilterUI();
                 this.saveSettings();
-                
+
                 // Notify content script specifically about account age filter toggle
                 this.notifyContentScript({
                     type: 'accountAgeFilterToggled',
@@ -270,16 +271,13 @@ class PopupManager {
 
 
         // Listen for counter updates from content script
-        if (typeof browser !== 'undefined' && browser.runtime) {
-            browser.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
-                if (message.type === 'countersUpdated' && message.counters) {
-                    this.counters = message.counters;
+        if (browser.runtime) {
+            browser.runtime.onMessage.addListener((message: unknown) => {
+                const msg = message as Message;
+                if (msg.type === 'countersUpdated' && msg.counters) {
+                    this.counters = msg.counters;
                     this.updateCounterDisplay();
-                    // Send acknowledgment
-                    sendResponse({ received: true });
                 }
-                // Return true to indicate we'll send a response asynchronously (even though we're doing it synchronously)
-                return true;
             });
         }
 
@@ -480,7 +478,7 @@ class PopupManager {
     updateAccountAgeFilterUI(): void {
         const ageFilterContainer = document.getElementById('ageFilterContainer');
         if (!ageFilterContainer) return;
-        
+
         if (this.settings.accountAgeFilterEnabled) {
             ageFilterContainer.style.opacity = '1';
             ageFilterContainer.style.pointerEvents = 'auto';
