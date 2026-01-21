@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "Codeium.codeium",
     "editor.wordWrap": "on",
     "[css]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
+      "editor.defaultFormatter": "vscode.css-language-features"
     }
   }
 }
