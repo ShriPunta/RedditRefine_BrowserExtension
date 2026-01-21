@@ -184,6 +184,9 @@ To verify the build succeeded:
 **CSS not applying in popup:**
 - Verify `popup.css` is present in `dist/` directory
 - Check that `popup.html` includes `<link rel="stylesheet" href="popup.css">`
+**Firefox validation warnings about innerHTML:**
+- The codebase avoids `innerHTML` to prevent security warnings
+- Use `createElement()` + `textContent` + `appendChild()` instead
 
 ## Known Limitations
 
