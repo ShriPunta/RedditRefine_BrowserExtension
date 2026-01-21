@@ -303,33 +303,45 @@ class PopupManager {
         const container = document.getElementById('keywordsContainer');
         if (!container) return;
 
-        container.innerHTML = '';
+        // Clear container by removing children
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
 
         if (this.filteredKeywords.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🔍</div>
-                    <div>No keywords found</div>
-                </div>
-            `;
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+
+            const icon = document.createElement('div');
+            icon.className = 'empty-state-icon';
+            icon.textContent = '🔍';
+
+            const text = document.createElement('div');
+            text.textContent = 'No keywords found';
+
+            emptyState.appendChild(icon);
+            emptyState.appendChild(text);
+            container.appendChild(emptyState);
             return;
         }
 
         this.filteredKeywords.forEach((keyword) => {
             const item = document.createElement('div');
             item.className = 'list-item';
-            item.innerHTML = `
-                <span>${keyword}</span>
-                <button class="delete-btn" data-keyword="${keyword}">Delete</button>
-            `;
 
-            const deleteBtn = item.querySelector('.delete-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => {
-                    this.removeKeyword(keyword);
-                });
-            }
+            const span = document.createElement('span');
+            span.textContent = keyword;
 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.setAttribute('data-keyword', keyword);
+            deleteBtn.addEventListener('click', () => {
+                this.removeKeyword(keyword);
+            });
+
+            item.appendChild(span);
+            item.appendChild(deleteBtn);
             container.appendChild(item);
         });
     }
@@ -387,33 +399,45 @@ class PopupManager {
         const container = document.getElementById('subredditsContainer');
         if (!container) return;
 
-        container.innerHTML = '';
+        // Clear container by removing children
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
 
         if (this.filteredSubreddits.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🔍</div>
-                    <div>No subreddits found</div>
-                </div>
-            `;
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+
+            const icon = document.createElement('div');
+            icon.className = 'empty-state-icon';
+            icon.textContent = '🔍';
+
+            const text = document.createElement('div');
+            text.textContent = 'No subreddits found';
+
+            emptyState.appendChild(icon);
+            emptyState.appendChild(text);
+            container.appendChild(emptyState);
             return;
         }
 
         this.filteredSubreddits.forEach((subreddit) => {
             const item = document.createElement('div');
             item.className = 'list-item';
-            item.innerHTML = `
-                <span>${subreddit}</span>
-                <button class="delete-btn" data-subreddit="${subreddit}">Delete</button>
-            `;
 
-            const deleteBtn = item.querySelector('.delete-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => {
-                    this.removeSubreddit(subreddit);
-                });
-            }
+            const span = document.createElement('span');
+            span.textContent = subreddit;
 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.setAttribute('data-subreddit', subreddit);
+            deleteBtn.addEventListener('click', () => {
+                this.removeSubreddit(subreddit);
+            });
+
+            item.appendChild(span);
+            item.appendChild(deleteBtn);
             container.appendChild(item);
         });
     }
