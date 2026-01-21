@@ -20,9 +20,9 @@
     "build:chrome": "TARGET_BROWSER=chrome npx webpack --config webpack.config.js",
     "build:prod": "NODE_ENV=production npm run build",
     "package": "npm run package:firefox",
-    "package:firefox": "npm run build:firefox && VERSION=$(node -p \"require('./dist/firefox/manifest.json').version\") && cd dist/firefox && zip -r \"../../releases/reddit-filter-addon-firefox-v$VERSION.zip\" . -x '*.DS_Store'",
-    "package:chrome": "npm run build:chrome && VERSION=$(node -p \"require('./dist/chrome/manifest.json').version\") && cd dist/chrome && zip -r \"../../releases/reddit-filter-addon-chrome-v$VERSION.zip\" . -x '*.DS_Store'",
-    "package:source": "VERSION=$(node -p \"require('./manifest.firefox.json').version\") && zip -r \"releases/reddit-filter-source-v$VERSION.zip\" README.md package.json package-lock.json src/ manifest.firefox.json manifest.chrome.json webpack.config.js tsconfig.json icons/ default_keywords.txt default_subreddits.txt -x '*.DS_Store' '**/node_modules/*' '**/.git/*' '**/dist/*' '**/releases/*'"
+    "package:firefox": "npm run build:firefox && VERSION=$(node -p \"require('./dist/firefox/manifest.json').version\") && cd dist/firefox && zip -r \"../../releases/reddit-refine-addon-firefox-v$VERSION.zip\" . -x '*.DS_Store'",
+    "package:chrome": "npm run build:chrome && VERSION=$(node -p \"require('./dist/chrome/manifest.json').version\") && cd dist/chrome && zip -r \"../../releases/reddit-refine-addon-chrome-v$VERSION.zip\" . -x '*.DS_Store'",
+    "package:source": "VERSION=$(node -p \"require('./manifest.firefox.json').version\") && zip -r \"releases/reddit-refine-source-v$VERSION.zip\" README.md package.json package-lock.json src/ manifest.firefox.json manifest.chrome.json webpack.config.js tsconfig.json icons/ default_keywords.txt default_subreddits.txt -x '*.DS_Store' '**/node_modules/*' '**/.git/*' '**/dist/*' '**/releases/*'"
   },
   "dependencies": {
     "webextension-polyfill": "^0.12.0"

@@ -385,12 +385,16 @@ class Filter {
 
         // Hide the original post content
         htmlElement.style.cssText = 'position: relative;';
-        const originalContent = htmlElement.innerHTML;
-        htmlElement.innerHTML = '';
+        // Store original children as DOM nodes instead of HTML string
+        const originalChildren = Array.from(htmlElement.childNodes).map(node => node.cloneNode(true));
+        // Clear content by removing children
+        while (htmlElement.firstChild) {
+            htmlElement.removeChild(htmlElement.firstChild);
+        }
         htmlElement.appendChild(banner);
 
         // Store original content and collapsed state
-        (htmlElement as any)._originalContent = originalContent;
+        (htmlElement as any)._originalChildren = originalChildren;
         (htmlElement as any)._isCollapsed = true;
 
         // Add click handler for toggle
@@ -399,13 +403,22 @@ class Filter {
 
             if (isCollapsed) {
                 // Show post - mark as user-expanded to prevent re-collapsing
-                htmlElement.innerHTML = (htmlElement as any)._originalContent;
+                // Clear and restore from stored nodes
+                while (htmlElement.firstChild) {
+                    htmlElement.removeChild(htmlElement.firstChild);
+                }
+                (htmlElement as any)._originalChildren.forEach((node: Node) => {
+                    htmlElement.appendChild(node.cloneNode(true));
+                });
                 htmlElement.setAttribute('data-reddit-filter-expanded', 'true');
                 (htmlElement as any)._isCollapsed = false;
             } else {
                 // Hide post - remove the expansion marker
                 this.pauseVideosInPost(htmlElement);
-                htmlElement.innerHTML = '';
+                // Clear content by removing children
+                while (htmlElement.firstChild) {
+                    htmlElement.removeChild(htmlElement.firstChild);
+                }
                 htmlElement.appendChild(banner);
                 htmlElement.removeAttribute('data-reddit-filter-expanded');
                 (htmlElement as any)._isCollapsed = true;
@@ -523,16 +536,16 @@ class Filter {
 
     private parseAccountCreationDate(html: string): Date | null {
         try {
-            // Create a temporary DOM element to parse the HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
+            // Use DOMParser instead of innerHTML for security
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
 
             // Look for the cake day element using the CSS selector path
-            const cakeDayElement = tempDiv.querySelector('div.flex:nth-child(3) > p:nth-child(1) > faceplate-tooltip:nth-child(1) > span:nth-child(1) > time:nth-child(1)');
+            const cakeDayElement = doc.querySelector('div.flex:nth-child(3) > p:nth-child(1) > faceplate-tooltip:nth-child(1) > span:nth-child(1) > time:nth-child(1)');
 
             if (!cakeDayElement) {
                 // Fallback: search for any time element with data-testid="cake-day"
-                const fallbackElement = tempDiv.querySelector('time[data-testid="cake-day"]');
+                const fallbackElement = doc.querySelector('time[data-testid="cake-day"]');
                 if (fallbackElement) {
                     const datetime = fallbackElement.getAttribute('datetime');
                     if (datetime) {
