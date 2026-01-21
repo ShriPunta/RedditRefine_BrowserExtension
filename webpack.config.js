@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
-const targetBrowser = process.env.TARGET_BROWSER || 'firefox';
+const targetBrowser = process.env.TARGET_BROWSER || 'chrome'; // Default to Chrome, supports 'chrome' or 'firefox'
 const distPath = path.resolve(__dirname, 'dist', targetBrowser);
 
 module.exports = {
