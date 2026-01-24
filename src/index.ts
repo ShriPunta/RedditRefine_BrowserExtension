@@ -78,7 +78,7 @@ class Filter {
             console.log('🔄 Starting async account age processor');
             this.asyncPostProcessorFn = setInterval(() => {
                 this.removePostsSecondPass();
-            }, 2000);
+            }, 5000); // Increased from 2s to 5s to reduce API call frequency
         } else {
             console.log('⏸️ Account age filter disabled - async processor stopped');
             // Clear the pending map since we're not processing it
@@ -95,7 +95,11 @@ class Filter {
         // Convert Map to array for processing
         const entries = Array.from(this.elementToPostMapProcessAsync.entries());
 
-        for (const [element, post] of entries) {
+        // Process only first 5 entries per batch to avoid blocking during fast scrolling
+        const batchSize = 5;
+        const batch = entries.slice(0, batchSize);
+
+        for (const [element, post] of batch) {
             // Check if element still exists before processing
             if (!document.contains(element)) {
                 this.elementToPostMapProcessAsync.delete(element);

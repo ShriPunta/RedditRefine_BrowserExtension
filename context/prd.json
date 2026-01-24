@@ -61,7 +61,7 @@
       "Test extension loading from .json format",
       "Verify attributes are utilized in filtering"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

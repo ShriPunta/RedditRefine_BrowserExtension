@@ -14,3 +14,11 @@
 - Statistics display (total/daily removed)
 - Updated webpack config for options entry point
 - Added options_ui to both manifests
+
+2026-01-24: Converted defaults to JSON with tags/categories
+- Created default_keywords.json with tag attributes (politics, ideology, policy-issues, etc)
+- Created default_subreddits.json with tag attributes
+- Updated defaults.ts to import JSON instead of TXT
+- Added KeywordData/SubredditData interfaces
+- Enabled resolveJsonModule in tsconfig
+- Foundation for topic-based filtering feature
