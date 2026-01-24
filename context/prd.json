@@ -1,0 +1,105 @@
+[
+  {
+    "category": "ui",
+    "description": "Migrate popup to neo-retro UI style",
+    "steps": [
+      "Open extension popup",
+      "Verify neo-retro aesthetic (hard shadows, thick borders, blue-tinted neutrals)",
+      "Check typography uses serif/mono combinations",
+      "Verify variable fonts in use",
+      "Test UI matches neo-retro design principles"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Generate options.html page for extension settings configuration",
+    "steps": [
+      "Navigate to extension options page",
+      "Verify options page exists and loads",
+      "Check settings UI for keyword management",
+      "Check settings UI for subreddit management",
+      "Verify settings persist to storage",
+      "Test sync between options page and popup"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add high-level topic selection (e.g., 'politics') that auto-loads related subreddits and keywords",
+    "steps": [
+      "Open settings/popup",
+      "Locate topic selection interface",
+      "Select 'politics' topic",
+      "Verify related subreddits auto-populate",
+      "Verify related keywords auto-populate",
+      "Test filtering with topic-based filters",
+      "Verify topic can be deselected"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add tagging feature for subreddits and keywords to denote associations",
+    "steps": [
+      "Open keyword/subreddit management",
+      "Add a tag to a keyword",
+      "Add a tag to a subreddit",
+      "Verify tags persist",
+      "Filter by tag",
+      "Verify tag associations display correctly"
+    ],
+    "passes": false
+  },
+  {
+    "category": "technical",
+    "description": "Store centrally-published keywords/subreddits in .json format with attributes",
+    "steps": [
+      "Locate central keyword/subreddit repository",
+      "Verify data is in .json format (not .txt)",
+      "Check .json includes attributes (category, tags, metadata)",
+      "Test extension loading from .json format",
+      "Verify attributes are utilized in filtering"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Add sentiment analysis for comments with age-appropriate warnings based on user age and post history",
+    "steps": [
+      "Navigate to Reddit post with comments",
+      "Verify sentiment analysis runs on comments",
+      "Check for warning indicators on inflammatory content",
+      "Verify user age factored into warnings",
+      "Verify post history influences analysis",
+      "Test AI-based reaction type detection"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Maintain central database that extension queries daily for keyword/subreddit updates",
+    "steps": [
+      "Verify central database exists",
+      "Check extension queries database on startup",
+      "Verify daily update mechanism",
+      "Test automatic filter updates",
+      "Check timestamp of last sync",
+      "Verify offline fallback behavior"
+    ],
+    "passes": false
+  },
+  {
+    "category": "bug",
+    "description": "Fix background tasks breaking Reddit infinite scrolling",
+    "steps": [
+      "Navigate to Reddit feed (r/all or homepage)",
+      "Scroll to bottom of page",
+      "Verify infinite scroll loads more posts",
+      "Check background tasks don't interfere",
+      "Test with extension enabled vs disabled",
+      "Verify console for relevant errors"
+    ],
+    "passes": false
+  }
+]

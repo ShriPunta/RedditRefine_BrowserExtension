@@ -1,3 +1,8 @@
-20 Jan 2026 | 10pm EST
+- Migrate the popup to neo-retro UI style.
+- Generate an options.html page for the user to configure settings of their extension.
+- Add a feature for user to select high level topics that they want to avoid e.g. selecting "politics" automatically loads all the related subreddits and keywords related to that.
+- add a feature to add tags for particular subreddit or a particular keyword denoting their their association.
+- make the central publishing of these keywords/subreddits types in github to be in `.json` format so it can have attributes. (I am hesitant to make it as github due to the public backlash for hiding political topics.)
 - Add support for gauging the comments using sentiment analysis and AI to caution on what type of reaction is the post/comment trying to invoke. Factor in the user's age and post history.
-- Maintain a central database of keywords and subreddits that the extension queries once a day to update itself. Use a public database to retrieve the list.
+- Maintain a central database of keywords and subreddits that the extension queries once a day to update itself. 
+- Figure out why does usage of background tasks breaks Reddit infinite scrolling feature.
