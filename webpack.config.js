@@ -10,6 +10,7 @@ module.exports = {
   entry: {
     index: './src/index.ts',
     popup: './src/popup/popup.ts',
+    options: './src/options/options.ts',
   },
   mode: isProduction ? 'production' : 'development',
   devtool: isProduction ? false : 'source-map', // No source maps in production
@@ -25,6 +26,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "src/popup/popup.html", to: "." },
+        { from: "src/options/options.html", to: "." },
         { from: "icons", to: "icons" },
         { from: "default_*.txt", to: "." },
         {

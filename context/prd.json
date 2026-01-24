@@ -9,7 +9,7 @@
       "Verify variable fonts in use",
       "Test UI matches neo-retro design principles"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",

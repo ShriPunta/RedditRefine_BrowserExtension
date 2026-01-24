@@ -56,6 +56,10 @@
     "storage",
     "activeTab"
   ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "reddit-filter@ShriPunta",

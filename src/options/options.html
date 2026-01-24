@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="options.css">
+        <title>Reddit Filter Settings</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Reddit Filter Settings</h1>
+                <p>Configure keywords, subreddits, and filtering behavior</p>
+            </div>
+
+            <div class="content">
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Filter Toggle</h2>
+                    </div>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="enableFilter">
+                            <span>Enable Filter</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Account Age Filter</h2>
+                    </div>
+                    <div class="toggle-container">
+                        <label class="toggle">
+                            <input type="checkbox" id="enableAccountAgeFilter">
+                            <span>Enable Account Age Filter</span>
+                        </label>
+                    </div>
+                    <div class="age-filter-container" id="ageFilterContainer">
+                        <div class="age-filter-header">
+                            <span class="age-filter-title">Min Account Age</span>
+                            <span class="age-value" id="ageValue">1 year</span>
+                        </div>
+                        <div class="slider-container">
+                            <input
+                                type="range"
+                                id="ageSlider"
+                                class="age-slider"
+                                min="1"
+                                max="60"
+                                value="12"
+                                step="1"
+                            >
+                            <div class="slider-labels">
+                                <span>1 month</span>
+                                <span>5 years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Keywords</h2>
+                        <p class="section-description">Posts containing these keywords will be filtered</p>
+                    </div>
+
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="keywordSearchInput"
+                            placeholder="Search keywords..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="keywordsContainer">
+                        <!-- Keywords populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <input
+                            type="text"
+                            class="add-input"
+                            id="keywordAddInput"
+                            placeholder="Add new keyword..."
+                        >
+                        <button class="add-btn" id="keywordAddBtn">Add</button>
+                    </div>
+
+                    <div class="item-stats" id="keywordStats">
+                        <!-- Stats shown here -->
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Subreddits</h2>
+                        <p class="section-description">Posts from these subreddits will be filtered</p>
+                    </div>
+
+                    <div class="search-container">
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="subredditSearchInput"
+                            placeholder="Search subreddits..."
+                        >
+                    </div>
+
+                    <div class="list-container" id="subredditsContainer">
+                        <!-- Subreddits populated here -->
+                    </div>
+
+                    <div class="add-container">
+                        <div class="input-with-prefix">
+                            <span class="input-prefix">r/</span>
+                            <input
+                                type="text"
+                                class="add-input prefixed-input"
+                                id="subredditAddInput"
+                                placeholder="subreddit name..."
+                            >
+                        </div>
+                        <button class="add-btn" id="subredditAddBtn">Add</button>
+                    </div>
+
+                    <div class="item-stats" id="subredditStats">
+                        <!-- Stats shown here -->
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Statistics</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCounter">0</div>
+                            <div class="stat-label">Total Removed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="dailyCounter">0</div>
+                            <div class="stat-label">Today</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="options.js"></script>
+    </body>
+</html>
