@@ -5,3 +5,12 @@
 - Integrated variable font settings
 - Removed all emojis per aesthetic
 - Implemented brutalist button shadow animations
+
+2026-01-24: Completed options page implementation
+- Created full-page options.html with neo-retro UI
+- Implemented OptionsManager class (similar to PopupManager)
+- Added keyword/subreddit management UI
+- Included account age filter controls
+- Statistics display (total/daily removed)
+- Updated webpack config for options entry point
+- Added options_ui to both manifests

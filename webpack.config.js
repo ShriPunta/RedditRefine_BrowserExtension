@@ -51,9 +51,13 @@ module.exports = {
         test: /\.txt$/,
         type: 'asset/source',
       },
+      {
+        test: /\.json$/,
+        type: 'json',
+      },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js', '.txt'],
+    extensions: ['.ts', '.js', '.txt', '.json'],
   },
 };

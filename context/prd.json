@@ -22,7 +22,7 @@
       "Verify settings persist to storage",
       "Test sync between options page and popup"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "functional",
