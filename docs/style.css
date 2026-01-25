@@ -22,8 +22,11 @@
   /* Semantic */
   --green-400: #4ade80;
   --green-500: #22c55e;
+}
 
-  /* Dark mode colors */
+/* Dark mode (default) */
+:root,
+:root[data-theme="dark"] {
   --bg: var(--neutral-950);
   --surface: var(--neutral-900);
   --card-bg: var(--neutral-800);
@@ -32,6 +35,20 @@
   --border: var(--neutral-700);
   --accent: var(--primary-500);
   --shadow: rgba(2, 6, 23, 0.4);
+  --bg-pattern: var(--neutral-900);
+}
+
+/* Light mode */
+:root[data-theme="light"] {
+  --bg: var(--neutral-50);
+  --surface: var(--neutral-100);
+  --card-bg: #ffffff;
+  --text: var(--neutral-900);
+  --text-secondary: var(--neutral-600);
+  --border: var(--neutral-300);
+  --accent: var(--primary-500);
+  --shadow: rgba(71, 82, 105, 0.2);
+  --bg-pattern: var(--neutral-100);
 }
 
 * {
@@ -46,7 +63,7 @@ body {
   font-weight: 450;
   background: var(--bg);
   background-image:
-    radial-gradient(circle, var(--neutral-900) 1.5px, transparent 1.5px);
+    radial-gradient(circle, var(--bg-pattern) 1.5px, transparent 1.5px);
   background-size: 20px 20px;
   color: var(--text);
   line-height: 1.5;
@@ -54,6 +71,44 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 2px 4px 0 0 var(--shadow);
+  z-index: 100;
+  transition: all 100ms ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--surface);
+  border-color: var(--neutral-600);
+}
+
+.theme-toggle:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: none;
+}
+
+.theme-icon {
+  line-height: 1;
+  user-select: none;
 }
 
 .single-screen-container {
@@ -285,9 +340,13 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(2, 6, 23, 0.95);
+  background-color: rgba(0, 0, 0, 0.85);
   align-items: center;
   justify-content: center;
+}
+
+:root[data-theme="light"] .modal {
+  background-color: rgba(255, 255, 255, 0.95);
 }
 
 .modal-content {
