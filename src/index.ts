@@ -295,7 +295,12 @@ class Filter {
 
                         this.logPostInConsole(post);
 
-                        this.hideElementOrClosestParentArticle(ele, post.removalReason);
+                        const wasCollapsed = this.hideElementOrClosestParentArticle(ele, post.removalReason);
+
+                        // Increment counters only if post was actually collapsed
+                        if (wasCollapsed) {
+                            this.incrementCounters();
+                        }
                     }
                 } catch (error) {
                     console.error(`Error checking age for user ${post.author}:`, error);
@@ -319,10 +324,12 @@ class Filter {
             if (post.shouldRemove) {
                 this.logPostInConsole(post);
 
-                this.hideElementOrClosestParentArticle(ele, post.removalReason);
+                const wasCollapsed = this.hideElementOrClosestParentArticle(ele, post.removalReason);
 
-                // Increment counters
-                this.incrementCounters();
+                // Increment counters only if post was actually collapsed (not already collapsed)
+                if (wasCollapsed) {
+                    this.incrementCounters();
+                }
             } else if (this.settings.accountAgeFilterEnabled) {
                 // Only add to async processing if account age filter is enabled
                 this.elementToPostMapProcessAsync.set(ele, post);
@@ -330,12 +337,12 @@ class Filter {
         });
     }
 
-    private hideElementOrClosestParentArticle(ele: Element, reason: string = '') {
-        this.collapsePost(ele, reason);
+    private hideElementOrClosestParentArticle(ele: Element, reason: string = ''): boolean {
+        return this.collapsePost(ele, reason);
     }
 
-    private collapsePost(ele: Element, reason: string) {
-        if (!document.contains(ele)) return;
+    private collapsePost(ele: Element, reason: string): boolean {
+        if (!document.contains(ele)) return false;
 
         const articleParent = ele.closest('article');
         const elementToCollapse = articleParent || ele;
@@ -343,7 +350,7 @@ class Filter {
 
         // Check if already collapsed to avoid duplicate processing
         if (htmlElement.querySelector('.reddit-filter-collapse-banner')) {
-            return;
+            return false;
         }
 
         // Stop video autoplay by pausing all videos in the post
@@ -436,6 +443,8 @@ class Filter {
             e.stopPropagation();
             togglePost();
         });
+
+        return true;
     }
 
     private pauseVideosInPost(element: HTMLElement) {

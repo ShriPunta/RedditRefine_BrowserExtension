@@ -80,6 +80,7 @@ class PopupManager {
         if (enableFilterEl) {
             enableFilterEl.checked = this.settings.enabled;
         }
+        this.updateFilterContentVisibility();
         this.filteredKeywords = [...this.settings.keywords];
         this.filteredSubreddits = [...this.settings.subreddits];
 
@@ -186,6 +187,7 @@ class PopupManager {
             enableFilterEl.addEventListener('change', (e) => {
                 const target = e.target as HTMLInputElement;
                 this.settings.enabled = target.checked;
+                this.updateFilterContentVisibility();
                 this.saveSettings();
             });
         }
@@ -504,11 +506,20 @@ class PopupManager {
         if (!ageFilterContainer) return;
 
         if (this.settings.accountAgeFilterEnabled) {
-            ageFilterContainer.style.opacity = '1';
-            ageFilterContainer.style.pointerEvents = 'auto';
+            ageFilterContainer.style.display = 'block';
         } else {
-            ageFilterContainer.style.opacity = '0.5';
-            ageFilterContainer.style.pointerEvents = 'none';
+            ageFilterContainer.style.display = 'none';
+        }
+    }
+
+    updateFilterContentVisibility(): void {
+        const filterContent = document.getElementById('filterContent');
+        if (!filterContent) return;
+
+        if (this.settings.enabled) {
+            filterContent.style.display = 'block';
+        } else {
+            filterContent.style.display = 'none';
         }
     }
 

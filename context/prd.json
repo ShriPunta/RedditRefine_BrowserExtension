@@ -101,5 +101,44 @@
       "Verify console for relevant errors"
     ],
     "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Only show rest of popup HTML if 'enable filter' is turned on",
+    "steps": [
+      "Open extension popup",
+      "Verify filter content hidden when 'enable filter' is off",
+      "Toggle 'enable filter' on",
+      "Verify all popup content displays",
+      "Toggle 'enable filter' off again",
+      "Verify content hides again"
+    ],
+    "passes": false
+  },
+  {
+    "category": "ui",
+    "description": "Only show account age slider if 'account age filter' is turned on",
+    "steps": [
+      "Open extension popup",
+      "Verify account age slider hidden when toggle is off",
+      "Toggle 'account age filter' on",
+      "Verify slider displays and is functional",
+      "Toggle 'account age filter' off",
+      "Verify slider hides"
+    ],
+    "passes": false
+  },
+  {
+    "category": "bug",
+    "description": "Fix removal count increasing when toggling 'enable filter'",
+    "steps": [
+      "Open extension popup and note current count",
+      "Toggle 'enable filter' off",
+      "Toggle 'enable filter' on",
+      "Verify count hasn't changed",
+      "Repeat toggle sequence multiple times",
+      "Confirm count only changes from actual post removals"
+    ],
+    "passes": false
   }
 ]
