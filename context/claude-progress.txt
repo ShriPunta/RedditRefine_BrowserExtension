@@ -47,3 +47,10 @@
 - Neo-retro styled modal with checkboxes, Skip/Apply buttons
 - Multi-pack support: can enable multiple packs simultaneously
 - User can edit/delete pack items after enabling (loses pack association)
+
+2026-01-24: Removed obsolete default JSON imports
+- Removed default_keywords.json and default_subreddits.json imports from defaults.ts
+- Removed KeywordData/SubredditData interfaces (no longer needed)
+- Simplified defaults.ts: DEFAULT_KEYWORDS and DEFAULT_SUBREDDITS now empty arrays
+- Filter packs system fully handles all default filters
+- Build verified successful, no type errors
