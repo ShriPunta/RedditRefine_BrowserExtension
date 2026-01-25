@@ -42,13 +42,8 @@
       <section class="screenshots-compact">
         <div class="carousel-container">
           <button class="carousel-btn carousel-btn-prev" aria-label="Previous screenshot">‹</button>
-          <div class="carousel-track">
-            <figure class="carousel-slide active">
-              <img src="screenshots/extension_packs.png" alt="Filter packs" class="carousel-img">
-            </figure>
-            <figure class="carousel-slide">
-              <img src="screenshots/extension_working.png" alt="Posts collapsed" class="carousel-img">
-            </figure>
+          <div class="carousel-track" id="carouselTrack">
+            <!-- Slides generated dynamically -->
           </div>
           <button class="carousel-btn carousel-btn-next" aria-label="Next screenshot">›</button>
         </div>
@@ -74,6 +69,27 @@
   </div>
 
   <script>
+    // Screenshot images to display
+    const screenshots = [
+      'extension_options.png',
+      'extension_packs.png',
+      'extension_popup.png',
+      'extension_working.png'
+    ];
+
+    // Generate carousel slides
+    const carouselTrack = document.getElementById('carouselTrack');
+    screenshots.forEach((filename, index) => {
+      const figure = document.createElement('figure');
+      figure.className = 'carousel-slide' + (index === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = `screenshots/${filename}`;
+      img.alt = filename.replace(/^extension_/, '').replace(/\.png$/, '').replace(/_/g, ' ');
+      img.className = 'carousel-img';
+      figure.appendChild(img);
+      carouselTrack.appendChild(figure);
+    });
+
     // Carousel functionality
     let currentSlide = 0;
     let autoRotateInterval;

@@ -1,5 +1,6 @@
 {
     "manifest_version": 3,
+    "id": "https://chromewebstore.google.com/detail/reddit-posts-and-subreddi/loejnpaccddielelefponckhpeikdclp",
     "name": "Reddit Refine - Filter, Analyze",
     "version": "1.4.0",
     "author": "ShriPunta",
