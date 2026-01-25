@@ -319,6 +319,12 @@ class Filter {
                 return;
             }
 
+            // Skip posts that are already collapsed to prevent re-incrementing counters
+            const htmlElement = articleParent as HTMLElement || ele as HTMLElement;
+            if (htmlElement.querySelector('.reddit-filter-collapse-banner')) {
+                return;
+            }
+
             const post = this.convertElementToPost(ele);
 
             if (post.shouldRemove) {

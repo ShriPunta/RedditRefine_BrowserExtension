@@ -28,7 +28,6 @@ module.exports = {
         { from: "src/popup/popup.html", to: "." },
         { from: "src/options/options.html", to: "." },
         { from: "icons", to: "icons" },
-        { from: "default_*.txt", to: "." },
         {
           from: targetBrowser === 'chrome' ? 'manifest.chrome.json' : 'manifest.firefox.json',
           to: 'manifest.json'
@@ -48,16 +47,12 @@ module.exports = {
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        test: /\.txt$/,
-        type: 'asset/source',
-      },
-      {
         test: /\.json$/,
         type: 'json',
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js', '.txt', '.json'],
+    extensions: ['.ts', '.js', '.json'],
   },
 };

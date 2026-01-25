@@ -3,7 +3,9 @@ dist/
 LLM/repomix
 .DS_Store
 default_keywords.txt
+default_keywords.json
 default_subreddits.txt
+default_subreddits.json
 releases/
 CLAUDE.md
 samples/

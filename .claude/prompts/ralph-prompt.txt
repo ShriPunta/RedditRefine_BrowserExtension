@@ -19,7 +19,9 @@
       - Add to learnings.md (if architectural/design pattern)
       - Include date + context
     </step4>
-    <step5>Append completion note to progress log</step5>
+    <step5>Append completion note to progress log
+    - Use this to leave a note for the next person working in the codebase (even if that person is you in a new session).
+    </step5>
     <step6>Git commit with descriptive message</step6>
     <step7>Update PRD: mark task done</step7>
     <step8>If PRD empty, output: &lt;promise&gt;COMPLETE&lt;/promise&gt;</step8>
@@ -40,12 +42,16 @@
   </knowledge_management>
 
   <constraints>
+  <scope_control>
+      - ONLY WORK ON A SINGLE FEATURE per loop iteration. 
+      - Do not "sneak in" extra fixes or start the next PRD item.
+      - Stop after the commit in Step 5 unless the PRD is 100% finished.
+    </scope_control>
     <quality>
       - Never skip tests
       - Never delete tests to fix failures
       - Refactor aggressively
       - Document new patterns in learnings.md
     </quality>
-    <scope>ONE feature per iteration, atomic commits</scope>
   </constraints>
 </autonomous_development_loop>
