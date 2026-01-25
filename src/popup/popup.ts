@@ -1,6 +1,19 @@
 import './popup.css';
 import browser from 'webextension-polyfill';
 import { DEFAULT_SETTINGS } from '../defaults';
+import filterPacksData from '../filter-packs.json';
+
+interface FilterPack {
+    name: string;
+    description: string;
+    keywords: string[];
+    subreddits: string[];
+}
+
+interface FilterItem {
+    value: string;
+    source?: string; // packId if from a pack
+}
 
 interface FilterSettings {
     keywords: string[];
@@ -8,6 +21,9 @@ interface FilterSettings {
     enabled: boolean;
     minAccountAge: number;
     accountAgeFilterEnabled: boolean;
+    enabledPacks?: string[]; // Track enabled pack IDs
+    keywordSources?: Record<string, string>; // keyword -> packId
+    subredditSources?: Record<string, string>; // subreddit -> packId
 }
 
 interface FilterCounters {
@@ -32,22 +48,34 @@ class PopupManager {
     private filteredKeywords: string[];
     private filteredSubreddits: string[];
     private currentTab: string;
+    private filterPacks: Record<string, FilterPack>;
 
     constructor() {
-        this.settings = DEFAULT_SETTINGS;
+        this.settings = {
+            ...DEFAULT_SETTINGS,
+            enabledPacks: [],
+            keywordSources: {},
+            subredditSources: {}
+        };
         this.counters = { totalRemoved: 0, dailyRemoved: 0, lastResetDate: new Date().toDateString() };
         this.filteredKeywords = [...DEFAULT_SETTINGS.keywords];
         this.filteredSubreddits = [...DEFAULT_SETTINGS.subreddits];
         this.currentTab = 'keywords';
+        this.filterPacks = filterPacksData as Record<string, FilterPack>;
         this.init();
     }
 
     async init(): Promise<void> {
         await this.loadSettings();
         await this.loadCounters();
+
+        // Check if this is first run
+        await this.checkFirstRun();
+
         this.setupEventListeners();
         this.setupTabs();
         this.renderAll();
+        this.renderPacks();
         this.updateAllStats();
         this.updateCounterDisplay();
 
@@ -293,6 +321,21 @@ class PopupManager {
 
         // Refresh counters on popup open
         this.refreshCounters();
+
+        // Onboarding modal event listeners
+        const skipOnboarding = document.getElementById('skipOnboarding');
+        if (skipOnboarding) {
+            skipOnboarding.addEventListener('click', () => {
+                this.closeOnboarding();
+            });
+        }
+
+        const applyOnboarding = document.getElementById('applyOnboarding');
+        if (applyOnboarding) {
+            applyOnboarding.addEventListener('click', () => {
+                this.applyOnboardingSelection();
+            });
+        }
     }
 
     async refreshCounters(): Promise<void> {
@@ -570,6 +613,261 @@ class PopupManager {
         } catch (error) {
             // Silently ignore if content script not available
         }
+    }
+
+    // Filter Packs methods
+    renderPacks(): void {
+        const container = document.getElementById('packsContainer');
+        if (!container) return;
+
+        // Clear container
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        const enabledPacks = this.settings.enabledPacks || [];
+
+        Object.entries(this.filterPacks).forEach(([packId, pack]) => {
+            const isEnabled = enabledPacks.includes(packId);
+            const card = document.createElement('div');
+            card.className = 'pack-card';
+            if (isEnabled) {
+                card.classList.add('enabled');
+            }
+
+            const header = document.createElement('div');
+            header.className = 'pack-header';
+
+            const title = document.createElement('h3');
+            title.className = 'pack-title';
+            title.textContent = pack.name;
+
+            const toggle = document.createElement('button');
+            toggle.className = 'pack-toggle';
+            toggle.textContent = isEnabled ? 'Enabled' : 'Enable';
+            toggle.addEventListener('click', () => {
+                if (isEnabled) {
+                    this.disablePack(packId);
+                } else {
+                    this.enablePack(packId);
+                }
+            });
+
+            header.appendChild(title);
+            header.appendChild(toggle);
+
+            const description = document.createElement('p');
+            description.className = 'pack-description';
+            description.textContent = pack.description;
+
+            const counts = document.createElement('div');
+            counts.className = 'pack-counts';
+
+            const keywordCount = document.createElement('span');
+            keywordCount.textContent = `${pack.keywords.length} keywords`;
+
+            const subredditCount = document.createElement('span');
+            subredditCount.textContent = `${pack.subreddits.length} subreddits`;
+
+            counts.appendChild(keywordCount);
+            if (pack.keywords.length > 0 && pack.subreddits.length > 0) {
+                const separator = document.createElement('span');
+                separator.textContent = ' • ';
+                counts.appendChild(separator);
+            }
+            counts.appendChild(subredditCount);
+
+            card.appendChild(header);
+            card.appendChild(description);
+            card.appendChild(counts);
+
+            container.appendChild(card);
+        });
+    }
+
+    enablePack(packId: string): void {
+        const pack = this.filterPacks[packId];
+        if (!pack) return;
+
+        // Initialize tracking structures if needed
+        if (!this.settings.enabledPacks) this.settings.enabledPacks = [];
+        if (!this.settings.keywordSources) this.settings.keywordSources = {};
+        if (!this.settings.subredditSources) this.settings.subredditSources = {};
+
+        // Add pack to enabled list
+        if (!this.settings.enabledPacks.includes(packId)) {
+            this.settings.enabledPacks.push(packId);
+        }
+
+        // Add keywords with source tracking
+        pack.keywords.forEach(keyword => {
+            const kw = keyword.toLowerCase();
+            if (!this.settings.keywords.includes(kw)) {
+                this.settings.keywords.push(kw);
+                this.settings.keywordSources![kw] = packId;
+            }
+        });
+
+        // Add subreddits with source tracking
+        pack.subreddits.forEach(subreddit => {
+            const sub = subreddit.toLowerCase();
+            const subWithPrefix = sub.startsWith('r/') ? sub : `r/${sub}`;
+            if (!this.settings.subreddits.includes(subWithPrefix)) {
+                this.settings.subreddits.push(subWithPrefix);
+                this.settings.subredditSources![subWithPrefix] = packId;
+            }
+        });
+
+        // Sort arrays
+        this.settings.keywords.sort();
+        this.settings.subreddits.sort();
+
+        // Update UI
+        this.filteredKeywords = [...this.settings.keywords];
+        this.filteredSubreddits = [...this.settings.subreddits];
+        this.renderPacks();
+        this.renderAll();
+        this.updateAllStats();
+        this.saveSettings();
+    }
+
+    disablePack(packId: string): void {
+        const pack = this.filterPacks[packId];
+        if (!pack) return;
+
+        // Remove pack from enabled list
+        if (this.settings.enabledPacks) {
+            this.settings.enabledPacks = this.settings.enabledPacks.filter(id => id !== packId);
+        }
+
+        // Remove keywords that came from this pack
+        if (this.settings.keywordSources) {
+            this.settings.keywords = this.settings.keywords.filter(kw =>
+                this.settings.keywordSources![kw] !== packId
+            );
+            // Clean up sources
+            Object.keys(this.settings.keywordSources).forEach(kw => {
+                if (this.settings.keywordSources![kw] === packId) {
+                    delete this.settings.keywordSources![kw];
+                }
+            });
+        }
+
+        // Remove subreddits that came from this pack
+        if (this.settings.subredditSources) {
+            this.settings.subreddits = this.settings.subreddits.filter(sub =>
+                this.settings.subredditSources![sub] !== packId
+            );
+            // Clean up sources
+            Object.keys(this.settings.subredditSources).forEach(sub => {
+                if (this.settings.subredditSources![sub] === packId) {
+                    delete this.settings.subredditSources![sub];
+                }
+            });
+        }
+
+        // Update UI
+        this.filteredKeywords = [...this.settings.keywords];
+        this.filteredSubreddits = [...this.settings.subreddits];
+        this.renderPacks();
+        this.renderAll();
+        this.updateAllStats();
+        this.saveSettings();
+    }
+
+    // Onboarding methods
+    async checkFirstRun(): Promise<void> {
+        try {
+            const result = await browser.storage.local.get(['hasSeenOnboarding']);
+            if (!result.hasSeenOnboarding) {
+                this.showOnboarding();
+            }
+        } catch (error) {
+            console.error('Failed to check first run:', error);
+        }
+    }
+
+    showOnboarding(): void {
+        const modal = document.getElementById('onboardingModal');
+        if (!modal) return;
+
+        // Populate packs
+        const container = document.getElementById('onboardingPacks');
+        if (!container) return;
+
+        // Clear container
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        Object.entries(this.filterPacks).forEach(([packId, pack]) => {
+            const item = document.createElement('div');
+            item.className = 'onboarding-pack-item';
+            item.dataset.packId = packId;
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'onboarding-pack-checkbox';
+            checkbox.id = `onboarding-${packId}`;
+
+            const info = document.createElement('div');
+            info.className = 'onboarding-pack-info';
+
+            const name = document.createElement('div');
+            name.className = 'onboarding-pack-name';
+            name.textContent = pack.name;
+
+            const description = document.createElement('div');
+            description.className = 'onboarding-pack-description';
+            description.textContent = pack.description;
+
+            info.appendChild(name);
+            info.appendChild(description);
+
+            item.appendChild(checkbox);
+            item.appendChild(info);
+
+            // Click item to toggle checkbox
+            item.addEventListener('click', (e) => {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                }
+                item.classList.toggle('selected', checkbox.checked);
+            });
+
+            checkbox.addEventListener('change', () => {
+                item.classList.toggle('selected', checkbox.checked);
+            });
+
+            container.appendChild(item);
+        });
+
+        modal.classList.add('show');
+    }
+
+    closeOnboarding(): void {
+        const modal = document.getElementById('onboardingModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        // Mark as seen
+        browser.storage.local.set({ hasSeenOnboarding: true });
+    }
+
+    applyOnboardingSelection(): void {
+        const container = document.getElementById('onboardingPacks');
+        if (!container) return;
+
+        const checkboxes = container.querySelectorAll('.onboarding-pack-checkbox');
+        checkboxes.forEach((checkbox) => {
+            const input = checkbox as HTMLInputElement;
+            if (input.checked) {
+                const packId = input.id.replace('onboarding-', '');
+                this.enablePack(packId);
+            }
+        });
+
+        this.closeOnboarding();
     }
 }
 

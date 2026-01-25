@@ -5,6 +5,25 @@
         <link rel="stylesheet" href="popup.css">
     </head>
     <body>
+        <!-- First-run onboarding modal -->
+        <div class="modal-overlay" id="onboardingModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Welcome to Reddit Filter</h2>
+                    <p>Choose filter packs to get started</p>
+                </div>
+                <div class="modal-body">
+                    <div class="onboarding-packs" id="onboardingPacks">
+                        <!-- Pack checkboxes will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn-secondary" id="skipOnboarding">Skip</button>
+                    <button class="modal-btn-primary" id="applyOnboarding">Apply Selected</button>
+                </div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="header">
                 <h2>Reddit Filter</h2>
@@ -72,6 +91,9 @@
                     <button class="tab" data-tab="subreddits">
                         Subreddits
                     </button>
+                    <button class="tab" data-tab="packs">
+                        Packs
+                    </button>
                 </div>
 
                 <!-- Keywords Tab -->
@@ -136,6 +158,17 @@
 
                     <div class="item-stats" id="subredditStats">
                         <!-- Stats will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Filter Packs Tab -->
+                <div class="tab-content" id="packs-tab">
+                    <div class="packs-header">
+                        <p class="packs-description">Pre-configured topic filters</p>
+                    </div>
+
+                    <div class="packs-container" id="packsContainer">
+                        <!-- Pack cards will be populated here -->
                     </div>
                 </div>
                 </div>

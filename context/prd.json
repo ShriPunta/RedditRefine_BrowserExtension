@@ -33,7 +33,7 @@
       "Style button to match neo-retro UI",
       "Test in both Chrome and Firefox"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "bug",
