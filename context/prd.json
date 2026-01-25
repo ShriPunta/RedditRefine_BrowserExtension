@@ -21,6 +21,6 @@
             "Test: Subscribe to pack v1, update extension to v2, verify items sync correctly",
             "Consider: Should edited items be overwritten on update? (Recommend: no, user edits take precedence)"
         ],
-        "passes": false
+        "passes": true
     }
 ]
