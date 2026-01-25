@@ -19,9 +19,6 @@ for ((i=1; i<=$1; i++)); do
   echo "=== Iteration $i/$1 ==="
 
   claude -p "$(cat "$PROMPT_FILE")" --permission-mode acceptEdits --allowedTools "Bash,Read,Edit,Bash(git diff:*),Bash(git log:*),Bash(git status:*),Bash(git commit:*)" | tee /tmp/claude_output.txt
-  result=$(cat /tmp/claude_output.txt)
-
-  echo "$result"
 
   if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
     echo "PRD complete, exiting."

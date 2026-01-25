@@ -46,7 +46,7 @@
       "Test with extension enabled vs disabled",
       "Verify console for relevant errors"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -59,7 +59,7 @@
       "Toggle 'enable filter' off again",
       "Verify content hides again"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
@@ -72,7 +72,7 @@
       "Toggle 'account age filter' off",
       "Verify slider hides"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "bug",

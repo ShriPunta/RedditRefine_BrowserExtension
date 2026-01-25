@@ -28,3 +28,9 @@
 - collapsePost() removed existing banner, recreated it → returned true → incremented counter
 - Fix: Added check in removePostsFirstPass() to skip posts with .reddit-filter-collapse-banner
 - Also cleaned up webpack.config.js: removed obsolete .txt references (now using JSON)
+
+2026-01-24: Added options page button to popup
+- Added "Advanced Settings" button between stats and account age filter sections
+- Button opens options page via browser.runtime.openOptionsPage()
+- Styled with neo-retro accent color (blue), uppercase text, hard shadow
+- Works in both Chrome & Firefox builds

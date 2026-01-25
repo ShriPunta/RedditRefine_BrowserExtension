@@ -283,6 +283,14 @@ class PopupManager {
             });
         }
 
+        // Options button
+        const optionsBtn = document.getElementById('optionsBtn');
+        if (optionsBtn) {
+            optionsBtn.addEventListener('click', () => {
+                browser.runtime.openOptionsPage();
+            });
+        }
+
         // Refresh counters on popup open
         this.refreshCounters();
     }
