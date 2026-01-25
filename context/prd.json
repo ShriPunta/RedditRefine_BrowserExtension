@@ -21,7 +21,7 @@
       "Test enabling multiple packs simultaneously",
       "Test disabling pack removes tagged items"
     ],
-    "passes": false
+    "passes": true
   },
   {
     "category": "ui",
