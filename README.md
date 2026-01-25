@@ -47,17 +47,14 @@ This extension helps restore the authentic Reddit experience by allowing you to 
 
 ## Build Instructions
 
-### Step 0: Required Files (For Mozilla Reviewers)
-The extension requires two text files for default filters:
-- `default_keywords.txt` - One keyword per line
-- `default_subreddits.txt` - One subreddit name per line (without "r/" prefix)
+### Step 0: Setup Filter Packs
+The extension requires `filter-packs.json` for filter definitions. Copy the sample to get started:
 
-**Sample content for testing:**
 ```bash
-# Create sample files for build testing
-echo -e "test\nexample" > default_keywords.txt
-echo -e "test\nexample" > default_subreddits.txt
+cp filter-packs.sample.json filter-packs.json
 ```
+
+You can customize the packs or add your own filter collections.
 
 ### Step 1: Install Dependencies
 ```bash
@@ -103,10 +100,9 @@ The build process creates the following files in the `dist/chrome` or `dist/fire
 - `popup.html` - Extension popup interface (from `src/popup/popup.html`)
 
 Additional files required for the extension:
-- `manifest.json` - Extension manifest
+- `manifest.chrome.json` / `manifest.firefox.json` - Browser-specific manifests
 - `icons/` - Extension icons in multiple sizes
-- `default_keywords.txt` - Default keyword filters
-- `default_subreddits.txt` - Default subreddit filters
+- `filter-packs.json` - Filter pack definitions (copy from filter-packs.sample.json)
 
 ## Development Scripts
 
@@ -138,12 +134,13 @@ src/
     ├── popup.css     # Popup styles
     └── popup.html    # Popup interface
 
-icons/                # Extension icons (multiple sizes)
-manifest.json         # Extension manifest
-webpack.config.js     # Webpack build configuration
-tsconfig.json         # TypeScript configuration
-default_keywords.txt  # Default keyword filters
-default_subreddits.txt # Default subreddit filters
+icons/                    # Extension icons (multiple sizes)
+manifest.chrome.json      # Chrome manifest (V3)
+manifest.firefox.json     # Firefox manifest (V2)
+webpack.config.js         # Webpack build configuration
+tsconfig.json             # TypeScript configuration
+filter-packs.json         # Filter pack definitions (gitignored)
+filter-packs.sample.json  # Sample filter packs
 ```
 
 ## Build Process Details
@@ -170,7 +167,7 @@ To verify the build succeeded:
 **Build fails with TypeScript errors:**
 - Ensure Node.js version 18+ is installed
 - Run `npm install` to ensure all dependencies are installed
-- Check that `default_keywords.txt` and `default_subreddits.txt` exist in the root directory
+- Check that `filter-packs.json` exists (copy from filter-packs.sample.json if missing)
 
 **Extension doesn't load:**
 - Verify all files are present in `dist/` directory

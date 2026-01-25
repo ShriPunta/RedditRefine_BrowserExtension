@@ -2,12 +2,7 @@ node_modules/
 dist/
 LLM/repomix
 .DS_Store
-default_keywords.json
-default_subreddits.json
 releases/
-CLAUDE.md
 samples/
 screenshots/
-sessions/
-
 filter-packs.json
