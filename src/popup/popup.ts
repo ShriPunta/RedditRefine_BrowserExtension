@@ -1,7 +1,7 @@
 import './popup.css';
 import browser from 'webextension-polyfill';
 import { DEFAULT_SETTINGS } from '../defaults';
-import filterPacksData from '../filter-packs.json';
+import filterPacksData from '../../filter-packs.json';
 
 interface FilterPack {
     name: string;

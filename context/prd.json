@@ -1,89 +1,15 @@
 [
   {
-    "category": "functional",
-    "description": "Implement filter packs system - pre-defined topic-based filter collections (e.g., 'Politics', 'Sports', 'Crypto')",
+    "category": "cleanup",
+    "description": "Remove default_keywords.json and default_subreddits.json imports from options page",
     "technical_details": {
-      "storage": "Static JSON file at src/filter-packs.json",
-      "format": "{ 'packId': { 'name': 'Display Name', 'description': '...', 'keywords': [...], 'subreddits': [...] } }",
-      "ui_location": "Popup - new 'Filter Packs' tab + first-run onboarding modal",
-      "behavior": "Multiple packs enabled simultaneously, items tagged with source pack, user can edit after enabling",
-      "distribution": "Static, shipped with extension updates"
+      "reason": "Default filters now merged into filter-packs system, making separate imports redundant",
+      "scope": "Check src/options/ for default file imports and remove them"
     },
     "steps": [
-      "Create src/filter-packs.json with initial packs (politics, sports, crypto, etc.)",
-      "Add first-run onboarding modal to select packs on install",
-      "Add 'Filter Packs' tab to popup interface",
-      "Implement pack enable/disable with cards showing name, description, item count",
-      "Tag imported items with source: 'packId' for tracking",
-      "Display active packs in popup UI",
-      "Allow user to edit individual items after pack is enabled",
-      "Verify items persist with pack source attribution",
-      "Test enabling multiple packs simultaneously",
-      "Test disabling pack removes tagged items"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Add button/link in popup to open options page",
-    "steps": [
-      "Add 'Options' or 'Settings' button to popup interface",
-      "Implement browser.runtime.openOptionsPage() on click",
-      "Verify clicking opens options page in new tab",
-      "Style button to match neo-retro UI",
-      "Test in both Chrome and Firefox"
-    ],
-    "passes": true
-  },
-  {
-    "category": "bug",
-    "description": "Fix background tasks breaking Reddit infinite scrolling",
-    "steps": [
-      "Navigate to Reddit feed (r/all or homepage)",
-      "Scroll to bottom of page",
-      "Verify infinite scroll loads more posts",
-      "Check background tasks don't interfere",
-      "Test with extension enabled vs disabled",
-      "Verify console for relevant errors"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Only show rest of popup HTML if 'enable filter' is turned on",
-    "steps": [
-      "Open extension popup",
-      "Verify filter content hidden when 'enable filter' is off",
-      "Toggle 'enable filter' on",
-      "Verify all popup content displays",
-      "Toggle 'enable filter' off again",
-      "Verify content hides again"
-    ],
-    "passes": true
-  },
-  {
-    "category": "ui",
-    "description": "Only show account age slider if 'account age filter' is turned on",
-    "steps": [
-      "Open extension popup",
-      "Verify account age slider hidden when toggle is off",
-      "Toggle 'account age filter' on",
-      "Verify slider displays and is functional",
-      "Toggle 'account age filter' off",
-      "Verify slider hides"
-    ],
-    "passes": true
-  },
-  {
-    "category": "bug",
-    "description": "Fix removal count increasing when toggling 'enable filter'",
-    "steps": [
-      "Open extension popup and note current count",
-      "Toggle 'enable filter' off",
-      "Toggle 'enable filter' on",
-      "Verify count hasn't changed",
-      "Repeat toggle sequence multiple times",
-      "Confirm count only changes from actual post removals"
+      "Locate default keyword/subreddit imports in options page",
+      "Remove unused imports",
+      "Verify options page still functions correctly"
     ],
     "passes": true
   }
