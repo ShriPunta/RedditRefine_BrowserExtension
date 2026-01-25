@@ -22,3 +22,9 @@
 - Added KeywordData/SubredditData interfaces
 - Enabled resolveJsonModule in tsconfig
 - Foundation for topic-based filtering feature
+
+2026-01-24: Fixed counter increment bug on toggle
+- Root cause: removePostsFirstPass() re-processed collapsed posts when toggling enable/disable
+- collapsePost() removed existing banner, recreated it → returned true → incremented counter
+- Fix: Added check in removePostsFirstPass() to skip posts with .reddit-filter-collapse-banner
+- Also cleaned up webpack.config.js: removed obsolete .txt references (now using JSON)

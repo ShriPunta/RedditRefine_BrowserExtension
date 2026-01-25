@@ -85,6 +85,6 @@
       "Repeat toggle sequence multiple times",
       "Confirm count only changes from actual post removals"
     ],
-    "passes": false
+    "passes": true
   }
 ]
