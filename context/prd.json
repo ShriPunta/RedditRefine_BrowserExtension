@@ -1,16 +1,26 @@
 [
-  {
-    "category": "cleanup",
-    "description": "Remove default_keywords.json and default_subreddits.json imports from options page",
-    "technical_details": {
-      "reason": "Default filters now merged into filter-packs system, making separate imports redundant",
-      "scope": "Check src/options/ for default file imports and remove them"
-    },
-    "steps": [
-      "Locate default keyword/subreddit imports in options page",
-      "Remove unused imports",
-      "Verify options page still functions correctly"
-    ],
-    "passes": true
-  }
+    {
+        "category": "functional",
+        "description": "Implement pack versioning & update system for subscribed filter packs",
+        "technical_details": {
+            "problem": "When packs are updated with new keywords/subreddits, existing subscribers don't receive updates. Need mechanism to track pack versions and decide on update strategy.",
+            "storage": "Track pack version in filter-packs.json (e.g., 'version': 1.0). Store user's subscribed pack versions in storage.",
+            "update_strategy": "Decision needed: (1) Auto-update to latest version, OR (2) Notify user of updates with option to sync, OR (3) Lock pack version at subscription time (no auto-updates)",
+            "ui_location": "Popup - show pack version, display update available badge if new version exists",
+            "current_behavior": "Unknown - if user subscribes to pack v1 and extension updates to pack v2, user only has v1 items. Need to clarify & implement."
+        },
+        "steps": [
+            "Document current behavior: What happens when user subscribes to pack and extension updates with new keywords?",
+            "Decide update strategy: auto-update vs user-opt-in vs locked versions",
+            "Add version field to filter-packs.json structure",
+            "Store subscribed pack versions in user storage (track version at subscription time)",
+            "Implement version comparison logic to detect available updates",
+            "If auto-update: Merge new items from updated pack into user's filter list",
+            "If opt-in: Show 'Update available' badge on pack in popup with merge preview",
+            "Tag items with version info: { source: 'packId', version: '1.0' }",
+            "Test: Subscribe to pack v1, update extension to v2, verify items sync correctly",
+            "Consider: Should edited items be overwritten on update? (Recommend: no, user edits take precedence)"
+        ],
+        "passes": false
+    }
 ]

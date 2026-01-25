@@ -670,11 +670,10 @@ class PopupManager {
             subredditCount.textContent = `${pack.subreddits.length} subreddits`;
 
             counts.appendChild(keywordCount);
-            if (pack.keywords.length > 0 && pack.subreddits.length > 0) {
-                const separator = document.createElement('span');
-                separator.textContent = ' • ';
-                counts.appendChild(separator);
-            }
+
+            const separator = document.createElement('span');
+            separator.textContent = ' • ';
+            counts.appendChild(separator);
             counts.appendChild(subredditCount);
 
             card.appendChild(header);
