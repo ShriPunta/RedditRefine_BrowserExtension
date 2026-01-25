@@ -23,7 +23,7 @@
     "package": "npm run package:firefox",
     "package:firefox": "npm run build:firefox && VERSION=$(node -p \"require('./dist/firefox/manifest.json').version\") && cd dist/firefox && zip -r \"../../releases/reddit-refine-addon-firefox-v$VERSION.zip\" . -x '*.DS_Store'",
     "package:chrome": "npm run build:chrome && VERSION=$(node -p \"require('./dist/chrome/manifest.json').version\") && cd dist/chrome && zip -r \"../../releases/reddit-refine-addon-chrome-v$VERSION.zip\" . -x '*.DS_Store'",
-    "package:source": "VERSION=$(node -p \"require('./manifest.firefox.json').version\") && zip -r \"releases/reddit-refine-source-v$VERSION.zip\" README.md package.json package-lock.json src/ manifest.firefox.json manifest.chrome.json webpack.config.js tsconfig.json icons/ filter-packs.json -x '*.DS_Store' '**/node_modules/*' '**/.git/*' '**/dist/*' '**/releases/*'"
+    "package:source": "VERSION=$(node -p \"require('./manifest.chrome.json').version\") && zip -r \"releases/reddit-refine-source-v$VERSION.zip\" README.md package.json package-lock.json src/ manifest.firefox.json manifest.chrome.json webpack.config.js tsconfig.json icons/ filter-packs.json -x '*.DS_Store' '**/node_modules/*' '**/.git/*' '**/dist/*' '**/releases/*'"
   },
   "dependencies": {
     "webextension-polyfill": "^0.12.0"
