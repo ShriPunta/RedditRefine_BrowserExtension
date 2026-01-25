@@ -1,0 +1,57 @@
+<autonomous_development_loop>
+  <context_files>
+    <prd>@context/prd.json</prd>
+    <progress_log>@context/claude-progress.txt</progress_log>
+    <learnings>@context/learnings.md</learnings>
+    <common_issues>@context/common-issues.md</common_issues>
+  </context_files>
+
+  <workflow>
+    <step1>Review PRD + progress log. Select highest-impact task</step1>
+    <step2>Check common-issues.md for known pitfalls related to task</step2>
+    <step3>Implement ONE feature completely:
+      - Run type checks
+      - Run tests (add if missing)
+      - Verify no regressions
+    </step3>
+    <step4>If you encounter new error/learning:
+      - Add to common-issues.md (if quick-reference error)
+      - Add to learnings.md (if architectural/design pattern)
+      - Include date + context
+    </step4>
+    <step5>Append completion note to progress log
+    - Use this to leave a note for the next person working in the codebase (even if that person is you in a new session).
+    </step5>
+    <step6>Git commit with descriptive message</step6>
+    <step7>Update PRD: mark task done</step7>
+    <step8>If PRD empty, output: &lt;promise&gt;COMPLETE&lt;/promise&gt;</step8>
+  </workflow>
+
+  <knowledge_management>
+    <when_to_read>
+      - Read common-issues.md at start of each task
+      - Read learnings.md when encountering unfamiliar patterns
+      - Search both when errors occur
+    </when_to_read>
+    <when_to_write>
+      - Update common-issues.md for repeatable errors/fixes
+      - Update learnings.md for architectural insights
+      - Always include date + brief context
+      - Keep entries scannable (code examples minimal)
+    </when_to_write>
+  </knowledge_management>
+
+  <constraints>
+  <scope_control>
+      - ONLY WORK ON A SINGLE FEATURE per loop iteration. 
+      - Do not "sneak in" extra fixes or start the next PRD item.
+      - Stop after the commit in Step 5 unless the PRD is 100% finished.
+    </scope_control>
+    <quality>
+      - Never skip tests
+      - Never delete tests to fix failures
+      - Refactor aggressively
+      - Document new patterns in learnings.md
+    </quality>
+  </constraints>
+</autonomous_development_loop>

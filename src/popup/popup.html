@@ -5,9 +5,28 @@
         <link rel="stylesheet" href="popup.css">
     </head>
     <body>
+        <!-- First-run onboarding modal -->
+        <div class="modal-overlay" id="onboardingModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Welcome to Reddit Filter</h2>
+                    <p>Choose filter packs to get started</p>
+                </div>
+                <div class="modal-body">
+                    <div class="onboarding-packs" id="onboardingPacks">
+                        <!-- Pack checkboxes will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn-secondary" id="skipOnboarding">Skip</button>
+                    <button class="modal-btn-primary" id="applyOnboarding">Apply Selected</button>
+                </div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="header">
-                <h2>🛡️ Filter</h2>
+                <h2>Reddit Filter</h2>
                 <p>Keep your Reddit feed clean and focused</p>
             </div>
 
@@ -19,10 +38,11 @@
                     </label>
                 </div>
 
+                <div class="filter-content" id="filterContent">
                 <div class="stats-section">
                     <div class="stats-compact">
                         <span class="stat-item">
-                            📊 <span class="stat-number" id="totalCounter"
+                            <span class="stat-number" id="totalCounter"
                             >0</span> removed
                         </span>
                         <span class="stat-separator">•</span>
@@ -32,6 +52,9 @@
                         </span>
                     </div>
                 </div>
+
+                <button class="options-btn" id="optionsBtn">Advanced Settings</button>
+
                 <div class="toggle-container">
                     <label class="toggle">
                         <input type="checkbox" id="enableAccountAgeFilter">
@@ -41,7 +64,7 @@
 
                 <div class="age-filter-container" id="ageFilterContainer">
                     <div class="age-filter-header">
-                        <span class="age-filter-title">👤 Min Account Age</span>
+                        <span class="age-filter-title">Min Account Age</span>
                         <span class="age-value" id="ageValue">1 year</span>
                     </div>
                     <div class="slider-container">
@@ -68,6 +91,9 @@
                     <button class="tab" data-tab="subreddits">
                         Subreddits
                     </button>
+                    <button class="tab" data-tab="packs">
+                        Packs
+                    </button>
                 </div>
 
                 <!-- Keywords Tab -->
@@ -77,7 +103,7 @@
                             type="text"
                             class="search-input"
                             id="keywordSearchInput"
-                            placeholder="🔍 Search keywords..."
+                            placeholder="Search keywords..."
                         >
                     </div>
 
@@ -107,7 +133,7 @@
                             type="text"
                             class="search-input"
                             id="subredditSearchInput"
-                            placeholder="🔍 Search subreddits..."
+                            placeholder="Search subreddits..."
                         >
                     </div>
 
@@ -133,6 +159,18 @@
                     <div class="item-stats" id="subredditStats">
                         <!-- Stats will be shown here -->
                     </div>
+                </div>
+
+                <!-- Filter Packs Tab -->
+                <div class="tab-content" id="packs-tab">
+                    <div class="packs-header">
+                        <p class="packs-description">Pre-configured topic filters</p>
+                    </div>
+
+                    <div class="packs-container" id="packsContainer">
+                        <!-- Pack cards will be populated here -->
+                    </div>
+                </div>
                 </div>
             </div>
         </div>

@@ -6,74 +6,144 @@
   <title>Reddit Refine - Take Back Control of Your Feed</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="icon-128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Recursive:wght@400..800&display=swap" rel="stylesheet">
   <meta name="description" content="A browser extension that filters Reddit posts based on keywords and subreddits, helping you maintain a cleaner browsing experience.">
 </head>
 <body>
-  <!-- Hero -->
-  <header class="hero">
-    <div class="container">
+  <div class="single-screen-container">
+    <!-- Left Column: Hero + Motivation -->
+    <aside class="hero-section">
       <img src="icon-128.png" alt="Reddit Refine icon" class="hero-icon">
       <h1>Reddit Refine</h1>
       <p class="tagline">Take back control of your feed</p>
+      <p class="motivation-text">Filter bots, political noise, and algorithmic clutter to restore authentic Reddit discussions.</p>
       <div class="cta-buttons">
         <a href="https://chromewebstore.google.com" class="btn btn-primary">Chrome Web Store</a>
         <a href="https://addons.mozilla.org/en-US/firefox/addon/reddit-refine/" class="btn btn-secondary">Firefox Add-ons</a>
       </div>
-    </div>
-  </header>
+    </aside>
 
-  <main>
-    <!-- Motivation -->
-    <section class="motivation">
-      <div class="container">
-        <p>Reddit's front page is increasingly dominated by bots, political content in non-political subreddits, and algorithmic noise. Reddit Refine helps restore the authentic experience by filtering out unwanted content while preserving the community-driven discussions that make Reddit valuable.</p>
-      </div>
-    </section>
-
-    <!-- Screenshots -->
-    <section class="screenshots">
-      <div class="container">
-        <h2>See It In Action</h2>
-        <div class="screenshot-grid">
-          <figure class="screenshot-item">
-            <img src="screenshots/extension_popup.png" alt="Reddit Refine popup interface">
-            <figcaption>Manage keywords and subreddits with an intuitive popup</figcaption>
-          </figure>
-          <figure class="screenshot-item">
-            <img src="screenshots/extension_working.png" alt="Reddit Refine filtering posts">
-            <figcaption>Filtered posts are collapsed with reasons shown</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section class="features">
-      <div class="container">
+    <!-- Right Column: Features + Screenshots -->
+    <main class="content-section">
+      <section class="features-compact">
         <h2>Features</h2>
         <ul class="features-list">
-          <li>Keyword filtering with word-boundary matching</li>
-          <li>Block entire subreddits from your feed</li>
-          <li>Account age filtering (optional)</li>
-          <li>Posts collapse with filter reasons shown</li>
-          <li>Daily and total removal statistics</li>
-          <li>Works on r/all, homepage, and profiles</li>
-          <li>Videos auto-pause when collapsed</li>
-          <li>Cross-browser: Chrome and Firefox</li>
+          <li><span class="feature-icon">✓</span>Curated filter packs</li>
+          <li><span class="feature-icon">✓</span>Keyword filtering</li>
+          <li><span class="feature-icon">✓</span>Block subreddits</li>
+          <li><span class="feature-icon">✓</span>Account age filter</li>
+          <li><span class="feature-icon">✓</span>Daily statistics</li>
+          <li><span class="feature-icon">✓</span>Chrome & Firefox</li>
         </ul>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
+      <section class="screenshots-compact">
+        <div class="carousel-container">
+          <button class="carousel-btn carousel-btn-prev" aria-label="Previous screenshot">‹</button>
+          <div class="carousel-track">
+            <figure class="carousel-slide active">
+              <img src="screenshots/extension_packs.png" alt="Filter packs" class="carousel-img">
+            </figure>
+            <figure class="carousel-slide">
+              <img src="screenshots/extension_working.png" alt="Posts collapsed" class="carousel-img">
+            </figure>
+          </div>
+          <button class="carousel-btn carousel-btn-next" aria-label="Next screenshot">›</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="compact-footer">
+    <div class="footer-content">
       <div class="footer-links">
         <a href="https://github.com/ShriPunta/RedditRefineBrowserExtension">GitHub</a>
-        <a href="privacy.html">Privacy Policy</a>
+        <span class="divider">•</span>
+        <a href="privacy.html">Privacy</a>
       </div>
-      <p>Made by ShriPunta</p>
+      <p>Made with ♥︎</p>
     </div>
   </footer>
+
+  <!-- Modal for full-size images -->
+  <div id="imageModal" class="modal">
+    <span class="modal-close">&times;</span>
+    <img class="modal-content" id="modalImg" alt="Full size screenshot">
+  </div>
+
+  <script>
+    // Carousel functionality
+    let currentSlide = 0;
+    let autoRotateInterval;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const prevBtn = document.querySelector('.carousel-btn-prev');
+    const nextBtn = document.querySelector('.carousel-btn-next');
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalClose = document.querySelector('.modal-close');
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(currentSlide);
+    }
+
+    function resetAutoRotate() {
+      clearInterval(autoRotateInterval);
+      autoRotateInterval = setInterval(nextSlide, 5000);
+    }
+
+    // Navigation buttons
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      resetAutoRotate();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      resetAutoRotate();
+    });
+
+    // Modal functionality
+    document.querySelectorAll('.carousel-img').forEach(img => {
+      img.addEventListener('click', function() {
+        modal.style.display = 'flex';
+        modalImg.src = this.src;
+        modalImg.alt = this.alt;
+      });
+    });
+
+    modalClose.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (modal.style.display === 'flex') {
+        if (e.key === 'Escape') modal.style.display = 'none';
+      }
+    });
+
+    // Start auto-rotation
+    autoRotateInterval = setInterval(nextSlide, 5000);
+  </script>
 </body>
 </html>

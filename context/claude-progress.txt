@@ -1,0 +1,67 @@
+2026-01-24: Completed neo-retro UI migration
+- Replaced gradient backgrounds with blue-tinted neutrals
+- Added thick borders (3-4px) and hard offset shadows (4-6px)
+- Applied IBM Plex Serif/Mono typography combo
+- Integrated variable font settings
+- Removed all emojis per aesthetic
+- Implemented brutalist button shadow animations
+
+2026-01-24: Completed options page implementation
+- Created full-page options.html with neo-retro UI
+- Implemented OptionsManager class (similar to PopupManager)
+- Added keyword/subreddit management UI
+- Included account age filter controls
+- Statistics display (total/daily removed)
+- Updated webpack config for options entry point
+- Added options_ui to both manifests
+
+2026-01-24: Converted defaults to JSON with tags/categories
+- Created default_keywords.json with tag attributes (politics, ideology, policy-issues, etc)
+- Created default_subreddits.json with tag attributes
+- Updated defaults.ts to import JSON instead of TXT
+- Added KeywordData/SubredditData interfaces
+- Enabled resolveJsonModule in tsconfig
+- Foundation for topic-based filtering feature
+
+2026-01-24: Fixed counter increment bug on toggle
+- Root cause: removePostsFirstPass() re-processed collapsed posts when toggling enable/disable
+- collapsePost() removed existing banner, recreated it → returned true → incremented counter
+- Fix: Added check in removePostsFirstPass() to skip posts with .reddit-filter-collapse-banner
+- Also cleaned up webpack.config.js: removed obsolete .txt references (now using JSON)
+
+2026-01-24: Added options page button to popup
+- Added "Advanced Settings" button between stats and account age filter sections
+- Button opens options page via browser.runtime.openOptionsPage()
+- Styled with neo-retro accent color (blue), uppercase text, hard shadow
+- Works in both Chrome & Firefox builds
+
+2026-01-24: Implemented filter packs system
+- Created src/filter-packs.json with 6 initial packs (Politics, Sports, Crypto, Gaming, Memes, NSFW)
+- Added "Packs" tab to popup with enable/disable cards
+- Pack cards show name, description, keyword/subreddit counts
+- Items tagged with source packId (keywordSources/subredditSources maps)
+- Enabling pack merges keywords/subreddits into settings with tracking
+- Disabling pack removes only items from that pack, preserves user-added items
+- First-run onboarding modal lets users select packs on install
+- Modal shown only once, stored in hasSeenOnboarding flag
+- Neo-retro styled modal with checkboxes, Skip/Apply buttons
+- Multi-pack support: can enable multiple packs simultaneously
+- User can edit/delete pack items after enabling (loses pack association)
+
+2026-01-24: Removed obsolete default JSON imports
+- Removed default_keywords.json and default_subreddits.json imports from defaults.ts
+- Removed KeywordData/SubredditData interfaces (no longer needed)
+- Simplified defaults.ts: DEFAULT_KEYWORDS and DEFAULT_SUBREDDITS now empty arrays
+- Filter packs system fully handles all default filters
+- Build verified successful, no type errors
+
+2026-01-25: Implemented pack versioning with auto-update
+- Added version field (1.0.0) to all 6 packs in filter-packs.json
+- Updated FilterPack interface: added version: string
+- Added packVersions to FilterSettings: tracks subscribed versions per packId
+- Modified enablePack(): stores pack version when user subscribes
+- Created updatePackVersions(): auto-merges new items when pack version changes
+- Integrated into loadSettings(): runs version check on every popup load
+- Strategy: auto-update (no user action needed), preserves user edits
+- Builds successful (Firefox + Chrome), no type errors
+- Manual testing approach documented in learnings.md

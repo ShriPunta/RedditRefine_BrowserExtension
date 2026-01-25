@@ -1,0 +1,418 @@
+/* Neo-Retro Design System - Options Page */
+:root {
+  /* Blue-tinted neutrals */
+  --neutral-0: #f8f9fb;
+  --neutral-1: #e8eaee;
+  --neutral-2: #d2d5db;
+  --neutral-3: #a8adb8;
+  --neutral-4: #6b7280;
+  --neutral-5: #3e4451;
+  --neutral-6: #1e2025;
+
+  /* Accent */
+  --accent: #4a5aff;
+  --accent-dark: #3244d9;
+  --success: #2dd4bf;
+  --danger: #f43f5e;
+
+  /* Shadows */
+  --shadow-offset: 6px;
+  --shadow-color: rgba(30, 32, 37, 0.15);
+}
+
+body {
+  min-width: 600px;
+  padding: 0;
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+  margin: 0;
+  background: var(--neutral-0);
+  color: var(--neutral-6);
+  font-size: 14px;
+  font-variation-settings: 'wght' 400;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--neutral-0);
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--accent);
+  color: white;
+  padding: 32px;
+  text-align: left;
+  border-bottom: 4px solid var(--neutral-6);
+  box-shadow: 0 var(--shadow-offset) 0 var(--shadow-color);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700;
+  letter-spacing: -0.02em;
+}
+
+.header p {
+  margin: 8px 0 0 0;
+  opacity: 0.9;
+  font-size: 14px;
+  font-variation-settings: 'wght' 400;
+}
+
+.content {
+  padding: 24px 32px;
+}
+
+.section {
+  margin-bottom: 32px;
+  background: var(--neutral-0);
+  border: 3px solid var(--neutral-6);
+  padding: 24px;
+  box-shadow: 6px 6px 0 var(--shadow-color);
+}
+
+.section-header {
+  margin-bottom: 20px;
+  border-bottom: 3px solid var(--neutral-2);
+  padding-bottom: 12px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700;
+  color: var(--neutral-6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-description {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  color: var(--neutral-4);
+  font-variation-settings: 'wght' 400;
+}
+
+.toggle-container {
+  background: var(--neutral-0);
+  border: 3px solid var(--neutral-6);
+  padding: 16px;
+  box-shadow: 4px 4px 0 var(--shadow-color);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  font-variation-settings: 'wght' 500;
+}
+
+.toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  border: 2px solid var(--neutral-6);
+}
+
+.search-container {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 3px solid var(--neutral-6);
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--neutral-0);
+  transition: box-shadow 0.1s ease;
+  font-variation-settings: 'wght' 400;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--accent);
+}
+
+.list-container {
+  border: 3px solid var(--neutral-6);
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--neutral-0);
+  margin-bottom: 16px;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--neutral-2);
+  font-size: 14px;
+  transition: background-color 0.1s ease;
+  font-variation-settings: 'wght' 400;
+}
+
+.list-item:hover {
+  background: var(--neutral-1);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item.hidden {
+  display: none;
+}
+
+.delete-btn {
+  background: var(--danger);
+  color: white;
+  border: 2px solid var(--neutral-6);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-variation-settings: 'wght' 600;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 2px 2px 0 var(--neutral-6);
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--neutral-6);
+}
+
+.delete-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.add-container {
+  display: flex;
+  gap: 12px;
+}
+
+.add-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 3px solid var(--neutral-6);
+  font-size: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--neutral-0);
+  transition: box-shadow 0.1s ease;
+  font-variation-settings: 'wght' 400;
+}
+
+.add-input:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 var(--success);
+}
+
+.add-btn {
+  background: var(--success);
+  color: var(--neutral-6);
+  border: 3px solid var(--neutral-6);
+  padding: 12px 24px;
+  cursor: pointer;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700;
+  transition: all 0.1s ease;
+  white-space: nowrap;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 4px 4px 0 var(--neutral-6);
+}
+
+.add-btn:hover {
+  background: #14b8a6;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--neutral-6);
+}
+
+.add-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.item-stats {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--neutral-4);
+  background: var(--neutral-1);
+  padding: 12px;
+  border: 2px solid var(--neutral-3);
+  font-variation-settings: 'wght' 500;
+}
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 16px;
+  color: var(--neutral-4);
+  pointer-events: none;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 14px;
+  font-variation-settings: 'wght' 700;
+}
+
+.prefixed-input {
+  padding-left: 36px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--neutral-4);
+}
+
+/* Scrollbar styling */
+.list-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.list-container::-webkit-scrollbar-track {
+  background: var(--neutral-1);
+  border-left: 2px solid var(--neutral-3);
+}
+
+.list-container::-webkit-scrollbar-thumb {
+  background: var(--neutral-4);
+  border: 2px solid var(--neutral-6);
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-5);
+}
+
+.age-filter-container {
+  background: var(--neutral-0);
+  border: 3px solid var(--neutral-6);
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 4px 4px 0 var(--shadow-color);
+}
+
+.age-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.age-filter-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--neutral-6);
+  font-variation-settings: 'wght' 600;
+}
+
+.age-value {
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 700;
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-variation-settings: 'wght' 700;
+}
+
+.slider-container {
+  position: relative;
+}
+
+.age-slider {
+  width: 100%;
+  height: 10px;
+  border: 2px solid var(--neutral-6);
+  background: var(--neutral-1);
+  outline: none;
+  opacity: 1;
+  transition: opacity 0.1s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.age-slider:hover {
+  opacity: 1;
+}
+
+.age-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--neutral-6);
+  box-shadow: 2px 2px 0 var(--neutral-6);
+}
+
+.age-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  background: var(--accent);
+  cursor: pointer;
+  border: 3px solid var(--neutral-6);
+  box-shadow: 2px 2px 0 var(--neutral-6);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--neutral-4);
+  margin-top: 8px;
+  font-variation-settings: 'wght' 500;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--neutral-0);
+  border: 3px solid var(--neutral-6);
+  padding: 24px;
+  text-align: center;
+  box-shadow: 4px 4px 0 var(--shadow-color);
+}
+
+.stat-card .stat-number {
+  font-size: 48px;
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--neutral-4);
+  font-weight: 600;
+  font-variation-settings: 'wght' 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
