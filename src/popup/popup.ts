@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS } from '../defaults';
 import filterPacksData from '../../filter-packs.json';
 
 interface FilterPack {
+    version: string;
     name: string;
     description: string;
     keywords: string[];
@@ -22,6 +23,7 @@ interface FilterSettings {
     minAccountAge: number;
     accountAgeFilterEnabled: boolean;
     enabledPacks?: string[]; // Track enabled pack IDs
+    packVersions?: Record<string, string>; // packId -> version subscribed
     keywordSources?: Record<string, string>; // keyword -> packId
     subredditSources?: Record<string, string>; // subreddit -> packId
 }
@@ -103,6 +105,9 @@ class PopupManager {
         } catch (error) {
             console.error('Failed to load settings:', error);
         }
+
+        // Auto-update subscribed packs to latest versions
+        await this.updatePackVersions();
 
         const enableFilterEl = document.getElementById('enableFilter') as HTMLInputElement;
         if (enableFilterEl) {
@@ -690,13 +695,15 @@ class PopupManager {
 
         // Initialize tracking structures if needed
         if (!this.settings.enabledPacks) this.settings.enabledPacks = [];
+        if (!this.settings.packVersions) this.settings.packVersions = {};
         if (!this.settings.keywordSources) this.settings.keywordSources = {};
         if (!this.settings.subredditSources) this.settings.subredditSources = {};
 
-        // Add pack to enabled list
+        // Add pack to enabled list and track version
         if (!this.settings.enabledPacks.includes(packId)) {
             this.settings.enabledPacks.push(packId);
         }
+        this.settings.packVersions[packId] = pack.version;
 
         // Add keywords with source tracking
         pack.keywords.forEach(keyword => {
@@ -772,6 +779,67 @@ class PopupManager {
         this.renderAll();
         this.updateAllStats();
         this.saveSettings();
+    }
+
+    async updatePackVersions(): Promise<void> {
+        if (!this.settings.enabledPacks || this.settings.enabledPacks.length === 0) {
+            return;
+        }
+
+        // Initialize version tracking if missing
+        if (!this.settings.packVersions) {
+            this.settings.packVersions = {};
+        }
+
+        let hasUpdates = false;
+
+        for (const packId of this.settings.enabledPacks) {
+            const pack = this.filterPacks[packId];
+            if (!pack) continue;
+
+            const subscribedVersion = this.settings.packVersions[packId];
+
+            // If no version recorded or version changed, update
+            if (!subscribedVersion || subscribedVersion !== pack.version) {
+                console.log(`Updating pack "${pack.name}" from ${subscribedVersion || 'unknown'} to ${pack.version}`);
+
+                // Initialize tracking if needed
+                if (!this.settings.keywordSources) this.settings.keywordSources = {};
+                if (!this.settings.subredditSources) this.settings.subredditSources = {};
+
+                // Merge new keywords
+                pack.keywords.forEach(keyword => {
+                    const kw = keyword.toLowerCase();
+                    if (!this.settings.keywords.includes(kw)) {
+                        this.settings.keywords.push(kw);
+                        this.settings.keywordSources![kw] = packId;
+                    }
+                });
+
+                // Merge new subreddits
+                pack.subreddits.forEach(subreddit => {
+                    const sub = subreddit.toLowerCase();
+                    const subWithPrefix = sub.startsWith('r/') ? sub : `r/${sub}`;
+                    if (!this.settings.subreddits.includes(subWithPrefix)) {
+                        this.settings.subreddits.push(subWithPrefix);
+                        this.settings.subredditSources![subWithPrefix] = packId;
+                    }
+                });
+
+                // Update version
+                this.settings.packVersions[packId] = pack.version;
+                hasUpdates = true;
+            }
+        }
+
+        if (hasUpdates) {
+            // Sort arrays
+            this.settings.keywords.sort();
+            this.settings.subreddits.sort();
+
+            // Save updated settings (also notifies content script)
+            await this.saveSettings();
+        }
     }
 
     // Onboarding methods

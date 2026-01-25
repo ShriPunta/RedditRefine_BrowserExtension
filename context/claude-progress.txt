@@ -54,3 +54,14 @@
 - Simplified defaults.ts: DEFAULT_KEYWORDS and DEFAULT_SUBREDDITS now empty arrays
 - Filter packs system fully handles all default filters
 - Build verified successful, no type errors
+
+2026-01-25: Implemented pack versioning with auto-update
+- Added version field (1.0.0) to all 6 packs in filter-packs.json
+- Updated FilterPack interface: added version: string
+- Added packVersions to FilterSettings: tracks subscribed versions per packId
+- Modified enablePack(): stores pack version when user subscribes
+- Created updatePackVersions(): auto-merges new items when pack version changes
+- Integrated into loadSettings(): runs version check on every popup load
+- Strategy: auto-update (no user action needed), preserves user edits
+- Builds successful (Firefox + Chrome), no type errors
+- Manual testing approach documented in learnings.md
