@@ -85,7 +85,9 @@ class PopupManager {
         try {
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
             if (tabs[0]) {
-                await browser.tabs.sendMessage(tabs[0].id!, { type: 'requestCounters' });
+                browser.tabs.sendMessage(tabs[0].id!, { type: 'requestCounters' }).catch(() => {
+                    // Silently ignore if content script not available
+                });
             }
         } catch (error) {
             // Silently ignore if content script not available or tab doesn't support messaging
@@ -160,7 +162,9 @@ class PopupManager {
             // Notify content script of settings update
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
             if (tabs[0]) {
-                browser.tabs.sendMessage(tabs[0].id!, { type: 'settingsUpdated' });
+                browser.tabs.sendMessage(tabs[0].id!, { type: 'settingsUpdated' }).catch(() => {
+                    // Silently ignore if content script not available
+                });
             }
         } catch (error) {
             console.error('Failed to save settings:', error);
@@ -594,26 +598,13 @@ class PopupManager {
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     async notifyContentScript(message: any): Promise<void> {
         try {
             const tabs = await browser.tabs.query({ active: true, currentWindow: true });
             if (tabs[0] && tabs[0].id) {
-                await browser.tabs.sendMessage(tabs[0].id, message);
+                browser.tabs.sendMessage(tabs[0].id, message).catch(() => {
+                    // Silently ignore if content script not available
+                });
             }
         } catch (error) {
             // Silently ignore if content script not available
